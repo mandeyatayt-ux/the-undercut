@@ -774,7 +774,7 @@ export default function App() {
           <div>
             <div style={{fontSize:13,fontWeight:700,color:"#999",letterSpacing:2,marginBottom:10,fontFamily:"'Barlow Condensed',sans-serif"}}>UPCOMING</div>
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260,1fr))",gap:12}}>
-              {rest.slice(0,8).map(r=><RaceCard key={r.round} race={r} />)}
+              {rest.map(r=><RaceCard key={r.round} race={r} />)}
             </div>
           </div>
         )}
@@ -961,48 +961,145 @@ export default function App() {
             {/* Control bar */}
             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:14,flexWrap:"wrap"}}>
               {["practice","quali","sprint","gp","podium"].map(m=>(
-                <button key={m} onClick={()=>setWeekendMode(m)} style={{padding:"6px 16px",borderRadius:6,border:"none",background:weekendMode===m?T.primary:"#FFF",color:weekendMode===m?"#FFF":"#888",fontSize:12,fontWeight:700,cursor:"pointer",letterSpacing:1,fontFamily:"'Barlow Condensed',sans-serif",textTransform:"uppercase",boxShadow:weekendMode===m?`0 4px 12px ${T.primary}40`:"0 1px 3px rgba(0,0,0,0.06)"}}>
+                <button key={m} onClick={()=>{setWeekendMode(m);if(!live){setPositions(genPos(0));setSectors(genSectors());setSegments(genSegments());setTyreHistory(genTyreHistory());}}} style={{padding:"6px 16px",borderRadius:6,border:"none",background:weekendMode===m?T.primary:"#FFF",color:weekendMode===m?"#FFF":"#888",fontSize:12,fontWeight:700,cursor:"pointer",letterSpacing:1,fontFamily:"'Barlow Condensed',sans-serif",textTransform:"uppercase",boxShadow:weekendMode===m?`0 4px 12px ${T.primary}40`:"0 1px 3px rgba(0,0,0,0.06)",transition:"all 0.2s"}}>
                   {m}
                 </button>
               ))}
               <div style={{flex:1}} />
-              {!live ? (
+              {weekendMode !== "podium" && (!live ? (
                 <button onClick={startSim} style={{padding:"6px 20px",borderRadius:6,border:"none",background:"#22C55E",color:"#FFF",fontSize:12,fontWeight:700,cursor:"pointer",letterSpacing:1}}>▶ START SIM</button>
               ) : (
                 <button onClick={()=>setLive(false)} style={{padding:"6px 20px",borderRadius:6,border:"none",background:"#E10600",color:"#FFF",fontSize:12,fontWeight:700,cursor:"pointer",letterSpacing:1}}>⏸ STOP</button>
-              )}
+              ))}
               {isLiveSession && <Badge color="#22C55E">● LIVE API</Badge>}
             </div>
 
-            {/* Race info bar */}
-            {live && (
-              <div style={{display:"flex",alignItems:"center",gap:16,padding:"10px 16px",background:"#FFF",borderRadius:10,border:"1px solid #eee",marginBottom:14}}>
+            {/* Session info banner */}
+            <div style={{display:"flex",alignItems:"center",gap:12,padding:"10px 16px",background:"#FFF",borderRadius:10,border:"1px solid #eee",marginBottom:14}}>
+              <div style={{width:4,height:28,background:T.primary,borderRadius:2}} />
+              <div>
+                <div style={{fontSize:16,fontWeight:800,color:"#1a1a22",fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:1}}>
+                  {weekendMode==="practice"?"FREE PRACTICE":weekendMode==="quali"?"QUALIFYING":weekendMode==="sprint"?"SPRINT RACE":weekendMode==="gp"?"GRAND PRIX":"PODIUM CEREMONY"}
+                </div>
+                <div style={{fontSize:10,color:"#999",letterSpacing:1}}>
+                  {weekendMode==="practice"?"60 MIN SESSION — NO POINTS":weekendMode==="quali"?"Q1 → Q2 → Q3 — KNOCKOUT FORMAT":weekendMode==="sprint"?"100KM — 1/3 POINTS":weekendMode==="gp"?`${totalLaps} LAPS — FULL POINTS`:"TOP 3 FINISHERS"}
+                </div>
+              </div>
+              <div style={{flex:1}} />
+              {live && <>
                 <div style={{fontSize:11,fontWeight:700,color:"#999",letterSpacing:1}}>LAP</div>
-                <div style={{fontSize:22,fontWeight:800,color:T.primary}}>{lap}/{totalLaps}</div>
+                <div style={{fontSize:22,fontWeight:800,color:T.primary}}>{lap}/{weekendMode==="sprint"?Math.floor(totalLaps/3):totalLaps}</div>
                 <div style={{width:1,height:28,background:"#eee"}} />
                 <div style={{fontSize:11,fontWeight:700,color:"#999",letterSpacing:1}}>FLAG</div>
                 <div style={{fontSize:14,fontWeight:800,color:flag==="GREEN"?"#22C55E":flag==="RED"?"#E10600":flag==="YELLOW"?"#EAB308":"#f80"}}>{flag}</div>
-                <div style={{flex:1}} />
                 <div style={{width:200,height:6,background:"#f0f0f0",borderRadius:3,overflow:"hidden"}}>
-                  <div style={{width:`${(lap/totalLaps)*100}%`,height:"100%",background:`linear-gradient(90deg,${T.primary},${T.secondary||T.primary})`,borderRadius:3,transition:"width 0.5s"}} />
+                  <div style={{width:`${(lap/(weekendMode==="sprint"?Math.floor(totalLaps/3):totalLaps))*100}%`,height:"100%",background:`linear-gradient(90deg,${T.primary},${T.secondary||T.primary})`,borderRadius:3,transition:"width 0.5s"}} />
+                </div>
+              </>}
+            </div>
+
+            {/* ═══ PODIUM MODE ═══ */}
+            {weekendMode === "podium" && (
+              <div style={{display:"flex",justifyContent:"center",gap:20,alignItems:"flex-end",padding:"40px 0",flexWrap:"wrap"}}>
+                {[1,0,2].map(idx=>{
+                  const d = positions[idx];
+                  if(!d) return null;
+                  const t = TEAMS[d.team]||TEAMS.neutral;
+                  const heights = [220,260,190];
+                  const medals = ["🥈","🥇","🥉"];
+                  return (
+                    <div key={idx} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:8,cursor:"pointer"}} onClick={()=>setProfileDriver(d.num)}>
+                      <div style={{fontSize:32}}>{medals[idx]}</div>
+                      <DriverAvatar num={d.num} code={d.code} team={d.team} size={idx===0?80:idx===1?100:70} />
+                      <div style={{textAlign:"center"}}>
+                        <div style={{fontSize:16,fontWeight:800,fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:1}}>{d.code}</div>
+                        <div style={{fontSize:11,color:"#999"}}>{d.name}</div>
+                      </div>
+                      <div style={{width:120,height:heights[idx],background:`linear-gradient(180deg,${t.primary},${t.primary}88)`,borderRadius:"8px 8px 0 0",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"flex-start",paddingTop:16}}>
+                        <div style={{fontSize:36,fontWeight:900,color:"#FFF",fontFamily:"'Barlow Condensed',sans-serif"}}>{idx===0?"2":idx===1?"1":"3"}</div>
+                        <div style={{fontSize:11,color:"#FFFa",marginTop:4}}>{d.bestLap}</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* ═══ QUALIFYING MODE ═══ */}
+            {weekendMode === "quali" && (
+              <div style={{display:"grid",gridTemplateColumns:"1fr 340px",gap:14}}>
+                <div>
+                  {/* Q session tabs */}
+                  <div style={{display:"flex",gap:4,marginBottom:8}}>
+                    {["Q1","Q2","Q3"].map(q=>(
+                      <div key={q} style={{padding:"4px 16px",borderRadius:4,background:q==="Q3"?T.primary:"#f0f0f0",color:q==="Q3"?"#FFF":"#888",fontSize:11,fontWeight:700,letterSpacing:1,fontFamily:"'Barlow Condensed',sans-serif"}}>{q}</div>
+                    ))}
+                    <div style={{flex:1}} />
+                    <Badge color="#E10600">KNOCKOUT</Badge>
+                  </div>
+                  {renderTimingTable()}
+                </div>
+                <div style={{display:"flex",flexDirection:"column",gap:14}}>
+                  <TrackMap positions={positions} teamKey={teamKey} />
+                  <div style={{background:"#FFF",borderRadius:12,padding:12,border:"1px solid #eee"}}>
+                    <div style={{fontSize:11,fontWeight:700,color:"#999",letterSpacing:2,marginBottom:6}}>ELIMINATION ZONE</div>
+                    {positions.slice(15,20).map((d,i)=>{
+                      const t=TEAMS[d.team]||TEAMS.neutral;
+                      return <div key={i} style={{display:"flex",alignItems:"center",gap:6,padding:"4px 0",borderBottom:"1px solid #f8f8f8"}}><div style={{width:3,height:16,background:t.primary,borderRadius:2}}/><span style={{fontSize:11,fontWeight:700,color:"#E10600"}}>{d.code}</span><span style={{flex:1}} /><span style={{fontSize:10,color:"#999"}}>{d.bestLap}</span></div>;
+                    })}
+                  </div>
                 </div>
               </div>
             )}
 
-            {/* Timing + Track */}
-            <div style={{display:"grid",gridTemplateColumns:"1fr 340px",gap:14}}>
-              <div>{renderTimingTable()}</div>
-              <div style={{display:"flex",flexDirection:"column",gap:14}}>
-                <TrackMap positions={positions} teamKey={teamKey} />
-                {/* Mini Race Control */}
-                <div style={{background:"#FFF",borderRadius:12,padding:12,border:"1px solid #eee",maxHeight:200,overflowY:"auto"}}>
-                  <div style={{fontSize:11,fontWeight:700,color:"#999",letterSpacing:2,marginBottom:6}}>RACE CONTROL</div>
-                  {filteredRC.slice(0,6).map((m,i)=>(
-                    <div key={i} style={{padding:"4px 0",fontSize:10,color:"#666",borderBottom:"1px solid #f8f8f8"}}>{m.time} — {m.msg}</div>
-                  ))}
+            {/* ═══ PRACTICE MODE ═══ */}
+            {weekendMode === "practice" && (
+              <div style={{display:"grid",gridTemplateColumns:"1fr 340px",gap:14}}>
+                <div>
+                  <div style={{display:"flex",gap:4,marginBottom:8}}>
+                    {["FP1","FP2","FP3"].map(fp=>(
+                      <div key={fp} style={{padding:"4px 16px",borderRadius:4,background:fp==="FP1"?T.primary:"#f0f0f0",color:fp==="FP1"?"#FFF":"#888",fontSize:11,fontWeight:700,letterSpacing:1,fontFamily:"'Barlow Condensed',sans-serif"}}>{fp}</div>
+                    ))}
+                    <div style={{flex:1}} />
+                    <Badge color="#888">SESSION</Badge>
+                  </div>
+                  {renderTimingTable()}
+                </div>
+                <div style={{display:"flex",flexDirection:"column",gap:14}}>
+                  <TrackMap positions={positions} teamKey={teamKey} />
+                  <div style={{background:"#FFF",borderRadius:12,padding:12,border:"1px solid #eee",maxHeight:200,overflowY:"auto"}}>
+                    <div style={{fontSize:11,fontWeight:700,color:"#999",letterSpacing:2,marginBottom:6}}>SESSION NOTES</div>
+                    <div style={{fontSize:11,color:"#666",lineHeight:1.5}}>
+                      Free practice session — teams testing setup changes, tyre compounds, and race simulations. Times may not represent true pace.
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
+
+            {/* ═══ GP / SPRINT MODE ═══ */}
+            {(weekendMode === "gp" || weekendMode === "sprint") && (
+              <div style={{display:"grid",gridTemplateColumns:"1fr 340px",gap:14}}>
+                <div>
+                  {weekendMode === "sprint" && (
+                    <div style={{display:"flex",gap:8,marginBottom:8,alignItems:"center"}}>
+                      <Badge color="#E67300">⚡ SPRINT</Badge>
+                      <span style={{fontSize:11,color:"#999",fontFamily:"'Barlow Condensed',sans-serif"}}>100KM · {Math.floor(totalLaps/3)} LAPS · TOP 8 SCORE</span>
+                    </div>
+                  )}
+                  {renderTimingTable()}
+                </div>
+                <div style={{display:"flex",flexDirection:"column",gap:14}}>
+                  <TrackMap positions={positions} teamKey={teamKey} />
+                  <div style={{background:"#FFF",borderRadius:12,padding:12,border:"1px solid #eee",maxHeight:200,overflowY:"auto"}}>
+                    <div style={{fontSize:11,fontWeight:700,color:"#999",letterSpacing:2,marginBottom:6}}>RACE CONTROL</div>
+                    {filteredRC.slice(0,6).map((m,i)=>(
+                      <div key={i} style={{padding:"4px 0",fontSize:10,color:"#666",borderBottom:"1px solid #f8f8f8"}}>{m.time} — {m.msg}</div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
