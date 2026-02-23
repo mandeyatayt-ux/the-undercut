@@ -58,18 +58,18 @@ const jolpica = {
 
 // ═══ TEAM DATA ═════════════════════════════════════════════════════
 const TEAMS = {
-  red_bull: { name: "Red Bull Racing", short: "RBR", primary: "#3671C6", secondary: "#CC1E4A", bg: "#080E1C", surface: "#0C1628", ids: ["red_bull"] },
-  ferrari: { name: "Scuderia Ferrari", short: "FER", primary: "#E8002D", secondary: "#FFF200", bg: "#140407", surface: "#220810", ids: ["ferrari"] },
-  mercedes: { name: "Mercedes-AMG", short: "MER", primary: "#27F4D2", secondary: "#000000", bg: "#06120F", surface: "#0A1E1A", ids: ["mercedes"] },
-  mclaren: { name: "McLaren F1 Team", short: "MCL", primary: "#FF8000", secondary: "#47C7FC", bg: "#140D03", surface: "#221806", ids: ["mclaren"] },
-  aston_martin: { name: "Aston Martin", short: "AMR", primary: "#229971", secondary: "#CEDC00", bg: "#061410", surface: "#0C221C", ids: ["aston_martin"] },
-  alpine: { name: "Alpine F1 Team", short: "ALP", primary: "#0093CC", secondary: "#FF69B4", bg: "#060F18", surface: "#0C1A28", ids: ["alpine"] },
-  williams: { name: "Williams Racing", short: "WIL", primary: "#64C4FF", secondary: "#005AFF", bg: "#060D14", surface: "#0C1822", ids: ["williams"] },
-  haas: { name: "Haas F1 Team", short: "HAS", primary: "#B6BABD", secondary: "#E10600", bg: "#0E0E0F", surface: "#181818", ids: ["haas"] },
-  rb: { name: "Racing Bulls", short: "RCB", primary: "#6692FF", secondary: "#FF4444", bg: "#080B18", surface: "#0E1428", ids: ["rb", "alphatauri"] },
-  audi: { name: "Audi F1 Team", short: "AUD", primary: "#E10019", secondary: "#000000", bg: "#1A0408", surface: "#280810", ids: ["sauber", "alfa", "audi", "kick"] },
-  cadillac: { name: "Cadillac F1 Team", short: "CAD", primary: "#C4A747", secondary: "#1A1A1A", bg: "#121008", surface: "#1E1A10", ids: ["cadillac", "andretti", "twg"] },
-  neutral: { name: "The Undercut", short: "F1", primary: "#E10600", secondary: "#FFD700", bg: "#08080C", surface: "#101016", ids: [] },
+  red_bull: { name: "Red Bull Racing", short: "RBR", primary: "#1E3A6E", secondary: "#CC1E4A", bg: "#FFFFFF", surface: "#F4F5F9", ids: ["red_bull"] },
+  ferrari: { name: "Scuderia Ferrari", short: "FER", primary: "#DC0000", secondary: "#A80000", bg: "#FFFFFF", surface: "#FFF5F5", ids: ["ferrari"] },
+  mercedes: { name: "Mercedes-AMG", short: "MER", primary: "#00A388", secondary: "#006B58", bg: "#FFFFFF", surface: "#F2FAF8", ids: ["mercedes"] },
+  mclaren: { name: "McLaren F1 Team", short: "MCL", primary: "#E67300", secondary: "#2BA0D0", bg: "#FFFFFF", surface: "#FFF8F0", ids: ["mclaren"] },
+  aston_martin: { name: "Aston Martin", short: "AMR", primary: "#1A7A60", secondary: "#9BA800", bg: "#FFFFFF", surface: "#F2F9F6", ids: ["aston_martin"] },
+  alpine: { name: "Alpine F1 Team", short: "ALP", primary: "#0077AA", secondary: "#E050A0", bg: "#FFFFFF", surface: "#F0F7FB", ids: ["alpine"] },
+  williams: { name: "Williams Racing", short: "WIL", primary: "#0050C8", secondary: "#003C9E", bg: "#FFFFFF", surface: "#F0F4FF", ids: ["williams"] },
+  haas: { name: "Haas F1 Team", short: "HAS", primary: "#6E6E6E", secondary: "#D40000", bg: "#FFFFFF", surface: "#F5F5F6", ids: ["haas"] },
+  rb: { name: "Racing Bulls", short: "RCB", primary: "#3355AA", secondary: "#CC2222", bg: "#FFFFFF", surface: "#F2F4FB", ids: ["rb", "alphatauri"] },
+  audi: { name: "Audi F1 Team", short: "AUD", primary: "#CC0018", secondary: "#222222", bg: "#FFFFFF", surface: "#FFF4F5", ids: ["sauber", "alfa", "audi", "kick"] },
+  cadillac: { name: "Cadillac F1 Team", short: "CAD", primary: "#8A7020", secondary: "#333333", bg: "#FFFFFF", surface: "#FAF8F0", ids: ["cadillac", "andretti", "twg"] },
+  neutral: { name: "The Undercut", short: "F1", primary: "#E10600", secondary: "#B07800", bg: "#FFFFFF", surface: "#F5F5F7", ids: [] },
 };
 
 const TIRE_COLORS = { SOFT: "#FF3333", MEDIUM: "#FFC300", HARD: "#EEEEEE", INTERMEDIATE: "#39B54A", WET: "#0072CE", UNKNOWN: "#888888" };
@@ -102,36 +102,36 @@ const TireChip = ({ compound, age }) => {
   const c = compound?.toUpperCase() || "UNKNOWN";
   return (
     <div style={{ display: "inline-flex", alignItems: "center", gap: 3 }}>
-      <div style={{ width: 18, height: 18, borderRadius: "50%", border: `2px solid ${TIRE_COLORS[c] || "#888"}`, background: "#0004", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, fontWeight: 900, color: TIRE_COLORS[c] || "#888", fontFamily: "var(--mono)" }}>{TIRE_LABELS[c] || "?"}</div>
+      <div style={{ width: 18, height: 18, borderRadius: "50%", border: `2px solid ${TIRE_COLORS[c] || "#888"}`, background: "#F8F8F8", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, fontWeight: 900, color: TIRE_COLORS[c] || "#888", fontFamily: "var(--mono)" }}>{TIRE_LABELS[c] || "?"}</div>
       {age != null && <span style={{ fontSize: 9, color: age > 15 ? "#FF5252" : "#666", fontFamily: "var(--mono)" }}>L{age}</span>}
     </div>
   );
 };
 
 const Card = ({ children, glow, style = {}, ...p }) => (
-  <div style={{ background: "var(--surface)", borderRadius: 14, border: `1px solid ${glow ? "var(--primary)33" : "#ffffff08"}`, overflow: "hidden", ...style }} {...p}>{children}</div>
+  <div style={{ background: "var(--surface)", borderRadius: 14, border: `1px solid ${glow ? "var(--primary)33" : "#00000008"}`, overflow: "hidden", ...style }} {...p}>{children}</div>
 );
 
 const CardHead = ({ children, right }) => (
-  <div style={{ padding: "12px 16px", borderBottom: "1px solid #ffffff06", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+  <div style={{ padding: "12px 16px", borderBottom: "1px solid #00000008", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
     <h3 style={{ margin: 0, fontSize: 10, fontFamily: "var(--mono)", fontWeight: 700, color: "var(--primary)", letterSpacing: 2.5 }}>{children}</h3>
     {right}
   </div>
 );
 
 const Badge = ({ children, color = "var(--primary)", s }) => (
-  <span style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: s ? "2px 8px" : "3px 10px", borderRadius: 20, background: `${color}15`, border: `1px solid ${color}40`, fontSize: s ? 8 : 9, fontWeight: 700, fontFamily: "var(--mono)", color, letterSpacing: 1, whiteSpace: "nowrap" }}>{children}</span>
+  <span style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: s ? "2px 8px" : "3px 10px", borderRadius: 20, background: `${color}10`, border: `1px solid ${color}40`, fontSize: s ? 8 : 9, fontWeight: 700, fontFamily: "var(--mono)", color, letterSpacing: 1, whiteSpace: "nowrap" }}>{children}</span>
 );
 
 const Loader = ({ label = "Loading..." }) => (
   <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 40, gap: 12 }}>
-    <div style={{ width: 28, height: 28, border: "3px solid #ffffff10", borderTopColor: "var(--primary)", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
-    <span style={{ fontSize: 10, color: "#555", fontFamily: "var(--mono)", letterSpacing: 2 }}>{label}</span>
+    <div style={{ width: 28, height: 28, border: "3px solid #00000010", borderTopColor: "var(--primary)", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+    <span style={{ fontSize: 10, color: "#999", fontFamily: "var(--mono)", letterSpacing: 2 }}>{label}</span>
   </div>
 );
 
 const FlagDot = ({ flag }) => {
-  const m = { GREEN: "#00C853", YELLOW: "#FFD600", RED: "#FF1744", DOUBLE_YELLOW: "#FF9100", BLUE: "#42A5F5", BLACK: "#FFF", CHEQUERED: "#FFF" };
+  const m = { GREEN: "#00C853", YELLOW: "#FFD600", RED: "#FF1744", DOUBLE_YELLOW: "#FF9100", BLUE: "#42A5F5", BLACK: "#1A1A2E", CHEQUERED: "#1A1A2E" };
   return <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: 2, background: m[flag?.toUpperCase()] || "#888", boxShadow: `0 0 4px ${m[flag?.toUpperCase()] || "#888"}66` }} />;
 };
 
@@ -398,7 +398,7 @@ export default function TheUndercut() {
   // ═══ ONBOARDING ═══
   if (onboarding) {
     return (
-      <div style={{ minHeight: "100vh", background: "#06060A", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 20, fontFamily: "'Segoe UI', system-ui" }}>
+      <div style={{ minHeight: "100vh", background: "#FFFFFF", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 20, fontFamily: "'Segoe UI', system-ui" }}>
         <style>{`
           @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;500;600;700;800&family=Barlow:wght@300;400;500;600;700;800;900&display=swap');
           :root { --mono: 'Bebas Neue', cursive; --sans: 'Barlow', sans-serif; --cond: 'Barlow Condensed', sans-serif; }
@@ -409,33 +409,33 @@ export default function TheUndercut() {
           @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
           @keyframes glow { 0%,100%{box-shadow:0 0 4px var(--primary)44} 50%{box-shadow:0 0 18px var(--primary)55} }
           @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
-          * { box-sizing:border-box; scrollbar-width:thin; scrollbar-color:#22222244 transparent }
-          *::-webkit-scrollbar{width:4px;height:4px} *::-webkit-scrollbar-track{background:transparent} *::-webkit-scrollbar-thumb{background:#333;border-radius:2px}
-          body{margin:0}
+          * { box-sizing:border-box; scrollbar-width:thin; scrollbar-color:#CCCCCC44 transparent }
+          *::-webkit-scrollbar{width:4px;height:4px} *::-webkit-scrollbar-track{background:transparent} *::-webkit-scrollbar-thumb{background:#CCC;border-radius:2px}
+          body{margin:0;background:#FFF}
         `}</style>
         <div style={{ textAlign: "center", marginBottom: 44, animation: "fadeUp 0.7s ease" }}>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#E1060012", border: "1px solid #E1060030", borderRadius: 100, padding: "5px 18px", marginBottom: 20 }}>
             <Dot color="#E10600" /><span style={{ fontSize: 11, fontFamily: "'Barlow Condensed'", fontWeight: 600, color: "#E10600", letterSpacing: 3 }}>2026 SEASON · LIVE DATA · 11 TEAMS</span>
           </div>
           <h1 style={{ fontSize: "clamp(56px, 10vw, 110px)", fontFamily: "'Bebas Neue'", fontWeight: 400, margin: 0, lineHeight: 0.9, letterSpacing: 4, background: "linear-gradient(135deg, #E10600 0%, #FFD700 40%, #E10600 80%)", backgroundSize: "200% auto", animation: "shimmer 3s linear infinite", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>THE UNDERCUT</h1>
-          <p style={{ color: "#555", fontSize: 13, fontFamily: "'Barlow Condensed'", letterSpacing: 5, fontWeight: 500, marginTop: 6 }}>REAL-TIME F1 INTELLIGENCE</p>
+          <p style={{ color: "#999", fontSize: 13, fontFamily: "'Barlow Condensed'", letterSpacing: 5, fontWeight: 500, marginTop: 6 }}>REAL-TIME F1 INTELLIGENCE</p>
           <div style={{ width: 60, height: 2, background: "linear-gradient(90deg, transparent, #E10600, transparent)", margin: "20px auto" }} />
-          <p style={{ color: "#666", fontSize: 14, fontFamily: "var(--sans)", maxWidth: 400, margin: "0 auto", lineHeight: 1.5 }}>
-            11 teams. 22 drivers. Powered by <strong style={{ color: "#888" }}>OpenF1</strong> + <strong style={{ color: "#888" }}>Jolpica-F1</strong> APIs. Choose your constructor — everything adapts.
+          <p style={{ color: "#888", fontSize: 14, fontFamily: "var(--sans)", maxWidth: 400, margin: "0 auto", lineHeight: 1.5 }}>
+            11 teams. 22 drivers. Powered by <strong style={{ color: "#999" }}>OpenF1</strong> + <strong style={{ color: "#999" }}>Jolpica-F1</strong> APIs. Choose your constructor — everything adapts.
           </p>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 8, maxWidth: 780, width: "100%" }}>
           {Object.entries(TEAMS).map(([key, t], idx) => (
             <button key={key} onClick={() => { setTeamKey(key); setTimeout(() => setOnboarding(false), 200); }} style={{
-              background: "#0A0A10", border: "1px solid #18181F", borderRadius: 12, padding: "14px 8px",
+              background: "#FAFAFA", border: "1px solid #E0E0E0", borderRadius: 12, padding: "14px 8px",
               cursor: "pointer", transition: "all 0.25s", animation: `fadeUp ${0.25 + idx * 0.04}s ease backwards`,
               textAlign: "center", position: "relative", overflow: "hidden",
             }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = t.primary; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = `0 6px 20px ${t.primary}18`; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = "#18181F"; e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "none"; }}>
+            onMouseEnter={e => { e.currentTarget.style.borderColor = t.primary; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = `0 6px 20px ${t.primary}22`; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = "#E0E0E0"; e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "none"; }}>
               <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${t.primary}, ${t.secondary})` }} />
               <div style={{ fontSize: 22, fontWeight: 400, fontFamily: "'Bebas Neue'", color: t.primary, letterSpacing: 2 }}>{t.short}</div>
-              <div style={{ fontSize: 9, color: "#777", fontFamily: "'Barlow Condensed'", fontWeight: 600, letterSpacing: 0.5 }}>{t.name}</div>
+              <div style={{ fontSize: 9, color: "#888", fontFamily: "'Barlow Condensed'", fontWeight: 600, letterSpacing: 0.5 }}>{t.name}</div>
             </button>
           ))}
         </div>
@@ -453,7 +453,7 @@ export default function TheUndercut() {
   ];
 
   return (
-    <div style={{ minHeight: "100vh", background: T.bg, color: "#E0E0E4", fontFamily: "var(--sans)", "--primary": T.primary, "--secondary": T.secondary, "--surface": T.surface, "--bg": T.bg, "--mono": "'Bebas Neue', cursive", "--cond": "'Barlow Condensed', sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: T.bg, color: "#1A1A2E", fontFamily: "var(--sans)", "--primary": T.primary, "--secondary": T.secondary, "--surface": T.surface, "--bg": T.bg, "--mono": "'Bebas Neue', cursive", "--cond": "'Barlow Condensed', sans-serif" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;500;600;700;800&family=Barlow:wght@300;400;500;600;700;800;900&display=swap');
         :root{--mono:'Bebas Neue',cursive;--sans:'Barlow',sans-serif;--cond:'Barlow Condensed',sans-serif}
@@ -463,25 +463,25 @@ export default function TheUndercut() {
         @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
         *{box-sizing:border-box;scrollbar-width:thin;scrollbar-color:${T.primary}22 transparent}
         *::-webkit-scrollbar{width:4px}*::-webkit-scrollbar-track{background:transparent}*::-webkit-scrollbar-thumb{background:${T.primary}33;border-radius:2px}
-        body{margin:0}
+        body{margin:0;background:#FFF}
       `}</style>
 
       {/* ═══ HEADER ═══ */}
-      <header style={{ background: T.surface, borderBottom: "1px solid #ffffff06", position: "sticky", top: 0, zIndex: 100 }}>
+      <header style={{ background: T.surface, borderBottom: "1px solid #00000008", position: "sticky", top: 0, zIndex: 100 }}>
         <div style={{ padding: "0 16px", maxWidth: 1400, margin: "0 auto" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 0" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <h1 style={{ fontSize: 24, fontFamily: "var(--mono)", fontWeight: 400, margin: 0, letterSpacing: 3, color: "#FFF" }}>THE <span style={{ color: T.primary }}>UNDERCUT</span></h1>
+              <h1 style={{ fontSize: 24, fontFamily: "var(--mono)", fontWeight: 400, margin: 0, letterSpacing: 3, color: "#111" }}>THE <span style={{ color: T.primary }}>UNDERCUT</span></h1>
               {latestSession && (
                 <Badge color={T.primary} s>
                   {latestSession.session_name} · {latestSession.location || latestSession.country_name || ""}
                 </Badge>
               )}
-              {loading.live && <div style={{ width: 14, height: 14, border: "2px solid #ffffff10", borderTopColor: T.primary, borderRadius: "50%", animation: "spin 0.7s linear infinite" }} />}
+              {loading.live && <div style={{ width: 14, height: 14, border: "2px solid #00000010", borderTopColor: T.primary, borderRadius: "50%", animation: "spin 0.7s linear infinite" }} />}
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: 8, color: "#444", fontFamily: "var(--cond)", letterSpacing: 1 }}>OPENF1 + JOLPICA</span>
-              <div onClick={() => setOnboarding(true)} style={{ width: 26, height: 26, borderRadius: 7, background: `linear-gradient(135deg, ${T.primary}, ${T.secondary})`, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontFamily: "var(--mono)", color: "#FFF" }}>{T.short[0]}</div>
+              <span style={{ fontSize: 8, color: "#999", fontFamily: "var(--cond)", letterSpacing: 1 }}>OPENF1 + JOLPICA</span>
+              <div onClick={() => setOnboarding(true)} style={{ width: 26, height: 26, borderRadius: 7, background: `linear-gradient(135deg, ${T.primary}, ${T.secondary})`, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontFamily: "var(--mono)", color: "#111" }}>{T.short[0]}</div>
             </div>
           </div>
           <nav style={{ display: "flex", gap: 1, overflow: "auto" }}>
@@ -505,21 +505,21 @@ export default function TheUndercut() {
           <div style={{ animation: "fadeUp 0.3s ease" }}>
             {/* Hero — Next Race */}
             <Card glow style={{ padding: 24, marginBottom: 14, position: "relative", overflow: "hidden" }}>
-              <div style={{ position: "absolute", inset: 0, background: `radial-gradient(ellipse at 85% 40%, ${T.primary}10 0%, transparent 55%)` }} />
+              <div style={{ position: "absolute", inset: 0, background: `radial-gradient(ellipse at 85% 40%, ${T.primary}08 0%, transparent 55%)` }} />
               <div style={{ position: "relative", zIndex: 1 }}>
                 {nextRace ? (
                   <>
                     <Badge color={T.primary} s>ROUND {nextRace.round}{nextRace.sprint ? " · SPRINT WEEKEND" : ""}</Badge>
-                    <h2 style={{ fontSize: "clamp(24px, 4vw, 38px)", fontFamily: "var(--mono)", fontWeight: 400, margin: "6px 0 0", letterSpacing: 3, color: "#FFF" }}>{nextRace.name}</h2>
-                    <p style={{ color: "#666", fontSize: 13, fontFamily: "var(--cond)", margin: "2px 0 0", fontWeight: 500 }}>
+                    <h2 style={{ fontSize: "clamp(24px, 4vw, 38px)", fontFamily: "var(--mono)", fontWeight: 400, margin: "6px 0 0", letterSpacing: 3, color: "#111" }}>{nextRace.name}</h2>
+                    <p style={{ color: "#888", fontSize: 13, fontFamily: "var(--cond)", margin: "2px 0 0", fontWeight: 500 }}>
                       {nextRace.circuit} · {nextRace.loc}, {nextRace.country} · {nextRace.date}
                     </p>
-                    {nextRace.quali && <p style={{ color: "#555", fontSize: 11, fontFamily: "var(--cond)", margin: "4px 0 0" }}>Qualifying: {nextRace.quali.date} {nextRace.quali.time?.replace("Z", " UTC")}</p>}
+                    {nextRace.quali && <p style={{ color: "#999", fontSize: 11, fontFamily: "var(--cond)", margin: "4px 0 0" }}>Qualifying: {nextRace.quali.date} {nextRace.quali.time?.replace("Z", " UTC")}</p>}
                   </>
                 ) : schedule ? (
                   <p style={{ color: "#888", fontSize: 14, fontFamily: "var(--cond)" }}>No upcoming race found in schedule.</p>
                 ) : loading.schedule ? <Loader label="FETCHING SCHEDULE" /> : (
-                  <p style={{ color: "#666", fontSize: 13 }}>Schedule unavailable — Jolpica API may be down.</p>
+                  <p style={{ color: "#888", fontSize: 13 }}>Schedule unavailable — Jolpica API may be down.</p>
                 )}
 
                 {/* Weather from OpenF1 */}
@@ -533,8 +533,8 @@ export default function TheUndercut() {
                       { l: "RAIN", v: processedWeather.rain ? "YES 🌧️" : "NO ☀️", ic: "" },
                       { l: "PRESSURE", v: `${processedWeather.pressure?.toFixed(0)} hPa`, ic: "📊" },
                     ].filter(w => w.v && !w.v.includes("undefined")).map(w => (
-                      <div key={w.l} style={{ background: "#ffffff05", border: "1px solid #ffffff06", borderRadius: 9, padding: "8px 14px", minWidth: 80, textAlign: "center" }}>
-                        <div style={{ fontSize: 8, color: "#555", fontFamily: "var(--cond)", fontWeight: 600, letterSpacing: 1 }}>{w.ic} {w.l}</div>
+                      <div key={w.l} style={{ background: "#00000006", border: "1px solid #00000008", borderRadius: 9, padding: "8px 14px", minWidth: 80, textAlign: "center" }}>
+                        <div style={{ fontSize: 8, color: "#999", fontFamily: "var(--cond)", fontWeight: 600, letterSpacing: 1 }}>{w.ic} {w.l}</div>
                         <div style={{ fontSize: 15, fontWeight: 400, fontFamily: "var(--mono)", color: T.primary, marginTop: 2, letterSpacing: 1 }}>{w.v}</div>
                       </div>
                     ))}
@@ -546,11 +546,11 @@ export default function TheUndercut() {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 12 }}>
               {/* Mini Standings */}
               <Card>
-                <CardHead right={<span style={{ fontSize: 9, color: "#444", cursor: "pointer" }} onClick={() => setTab("standings")}>VIEW ALL →</span>}>DRIVER STANDINGS (JOLPICA)</CardHead>
+                <CardHead right={<span style={{ fontSize: 9, color: "#999", cursor: "pointer" }} onClick={() => setTab("standings")}>VIEW ALL →</span>}>DRIVER STANDINGS (JOLPICA)</CardHead>
                 {loading.standings ? <Loader label="FETCHING STANDINGS" /> : processedDriverStandings ? (
                   <div style={{ padding: "2px 0" }}>
                     {processedDriverStandings.slice(0, 8).map((d, i) => (
-                      <div key={d.code} style={{ display: "flex", alignItems: "center", padding: "7px 16px", borderBottom: "1px solid #ffffff04", background: d.teamKey === teamKey ? `${T.primary}06` : "transparent" }}>
+                      <div key={d.code} style={{ display: "flex", alignItems: "center", padding: "7px 16px", borderBottom: "1px solid #00000006", background: d.teamKey === teamKey ? `${T.primary}08` : "transparent" }}>
                         <span style={{ width: 20, fontSize: 16, fontFamily: "var(--mono)", color: i < 3 ? T.primary : "#444", letterSpacing: 1 }}>{d.pos}</span>
                         <div style={{ width: 3, height: 14, background: TEAMS[d.teamKey]?.primary || "#888", borderRadius: 2, margin: "0 8px" }} />
                         <span style={{ fontSize: 10, fontFamily: "var(--cond)", fontWeight: 700, color: TEAMS[d.teamKey]?.primary || "#888", width: 32 }}>{d.code}</span>
@@ -559,23 +559,23 @@ export default function TheUndercut() {
                       </div>
                     ))}
                   </div>
-                ) : <div style={{ padding: 20, textAlign: "center", color: "#555", fontSize: 12 }}>Standings unavailable</div>}
+                ) : <div style={{ padding: 20, textAlign: "center", color: "#999", fontSize: 12 }}>Standings unavailable</div>}
               </Card>
 
               {/* Race Control Mini */}
               <Card>
-                <CardHead right={<span style={{ fontSize: 9, color: "#444", cursor: "pointer" }} onClick={() => setTab("racecontrol")}>FULL LOG →</span>}>🚦 RACE CONTROL (OPENF1)</CardHead>
+                <CardHead right={<span style={{ fontSize: 9, color: "#999", cursor: "pointer" }} onClick={() => setTab("racecontrol")}>FULL LOG →</span>}>🚦 RACE CONTROL (OPENF1)</CardHead>
                 {processedRaceControl ? (
                   <div style={{ padding: "4px 0", maxHeight: 260, overflow: "auto" }}>
                     {processedRaceControl.slice(0, 10).map((m, i) => (
-                      <div key={i} style={{ display: "flex", gap: 8, padding: "6px 16px", borderBottom: "1px solid #ffffff03", fontSize: 11 }}>
-                        <span style={{ fontFamily: "var(--cond)", fontSize: 10, color: "#444", minWidth: 55, fontWeight: 600 }}>{m.time}</span>
+                      <div key={i} style={{ display: "flex", gap: 8, padding: "6px 16px", borderBottom: "1px solid #00000005", fontSize: 11 }}>
+                        <span style={{ fontFamily: "var(--cond)", fontSize: 10, color: "#999", minWidth: 55, fontWeight: 600 }}>{m.time}</span>
                         {m.flag && <FlagDot flag={m.flag} />}
                         <span style={{ color: m.cat === "Flag" ? "#FFD600" : m.cat === "SafetyCar" ? "#FFC107" : "#999", fontWeight: 500, lineHeight: 1.3, fontSize: 11 }}>{m.msg}</span>
                       </div>
                     ))}
                   </div>
-                ) : loading.live ? <Loader label="FETCHING RACE CONTROL" /> : <div style={{ padding: 20, textAlign: "center", color: "#555", fontSize: 12 }}>No race control data</div>}
+                ) : loading.live ? <Loader label="FETCHING RACE CONTROL" /> : <div style={{ padding: 20, textAlign: "center", color: "#999", fontSize: 12, color: "#999" }}>No race control data</div>}
               </Card>
 
               {/* Last Race Result */}
@@ -583,11 +583,11 @@ export default function TheUndercut() {
                 <CardHead>🏁 LAST RACE RESULT (JOLPICA)</CardHead>
                 {lastResult ? (
                   <div style={{ padding: "6px 0" }}>
-                    <div style={{ padding: "8px 16px", borderBottom: "1px solid #ffffff06", fontSize: 12, color: "#888", fontFamily: "var(--cond)", fontWeight: 600 }}>
+                    <div style={{ padding: "8px 16px", borderBottom: "1px solid #00000008", fontSize: 12, color: "#888", fontFamily: "var(--cond)", fontWeight: 600 }}>
                       {lastResult.raceName} — {lastResult.Circuit?.circuitName} — {lastResult.date}
                     </div>
                     {lastResult.Results?.slice(0, 6).map((r, i) => (
-                      <div key={i} style={{ display: "flex", alignItems: "center", padding: "6px 16px", borderBottom: "1px solid #ffffff03" }}>
+                      <div key={i} style={{ display: "flex", alignItems: "center", padding: "6px 16px", borderBottom: "1px solid #00000005" }}>
                         <span style={{ width: 20, fontSize: 16, fontFamily: "var(--mono)", color: i < 3 ? T.primary : "#444" }}>{r.position}</span>
                         <div style={{ width: 3, height: 14, background: TEAMS[mapConstructorToTeamKey(r.Constructor?.constructorId)]?.primary || "#888", borderRadius: 2, margin: "0 8px" }} />
                         <span style={{ flex: 1, fontSize: 12, fontWeight: 600 }}>{r.Driver?.givenName} {r.Driver?.familyName}</span>
@@ -596,7 +596,7 @@ export default function TheUndercut() {
                       </div>
                     ))}
                   </div>
-                ) : <div style={{ padding: 20, textAlign: "center", color: "#555", fontSize: 12 }}>No recent result available</div>}
+                ) : <div style={{ padding: 20, textAlign: "center", color: "#999", fontSize: 12, color: "#999" }}>No recent result available</div>}
               </Card>
             </div>
           </div>
@@ -609,7 +609,7 @@ export default function TheUndercut() {
             <Card glow>
               <CardHead right={
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 8, color: "#444", fontFamily: "var(--cond)", letterSpacing: 1 }}>AUTO-REFRESH 30s</span>
+                  <span style={{ fontSize: 8, color: "#999", fontFamily: "var(--cond)", letterSpacing: 1 }}>AUTO-REFRESH 30s</span>
                   <Dot color="#00C853" size={5} />
                 </div>
               }>📋 LIVE TIMING (OPENF1 API)</CardHead>
@@ -617,35 +617,35 @@ export default function TheUndercut() {
                 <div style={{ overflowX: "auto" }}>
                   <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
                     <thead>
-                      <tr style={{ background: "#ffffff03" }}>
+                      <tr style={{ background: "#00000005" }}>
                         {["P", "", "DRIVER", "TEAM", "GAP", "INTERVAL", "LAST LAP", "TIRE", "PITS"].map(h => (
-                          <th key={h} style={{ padding: "8px 10px", textAlign: "left", fontFamily: "var(--cond)", fontWeight: 700, color: "#444", fontSize: 9, letterSpacing: 1.5 }}>{h}</th>
+                          <th key={h} style={{ padding: "8px 10px", textAlign: "left", fontFamily: "var(--cond)", fontWeight: 700, color: "#999", fontSize: 9, letterSpacing: 1.5 }}>{h}</th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
                       {processedPositions.map((d, i) => (
-                        <tr key={d.num} style={{ borderBottom: "1px solid #ffffff03", background: d.teamKey === teamKey ? `${T.primary}06` : "transparent", transition: "background 0.3s" }}>
+                        <tr key={d.num} style={{ borderBottom: "1px solid #00000005", background: d.teamKey === teamKey ? `${T.primary}08` : "transparent", transition: "background 0.3s" }}>
                           <td style={{ padding: "7px 10px", fontFamily: "var(--mono)", fontSize: 16, color: i < 3 ? T.primary : "#444", letterSpacing: 1 }}>{d.pos}</td>
                           <td style={{ padding: "7px 4px" }}><div style={{ width: 3, height: 14, background: d.teamColor, borderRadius: 2 }} /></td>
                           <td style={{ padding: "7px 10px", fontWeight: 700, whiteSpace: "nowrap" }}>
                             <span style={{ fontFamily: "var(--cond)", fontWeight: 800, fontSize: 11, color: d.teamColor, marginRight: 5 }}>{d.code}</span>
-                            <span style={{ fontSize: 11, fontWeight: 500, color: "#BBB" }}>{d.name}</span>
+                            <span style={{ fontSize: 11, fontWeight: 500, color: "#999" }}>{d.name}</span>
                           </td>
-                          <td style={{ padding: "7px 10px", fontSize: 10, color: "#666", fontFamily: "var(--cond)" }}>{d.teamName}</td>
+                          <td style={{ padding: "7px 10px", fontSize: 10, color: "#888", fontFamily: "var(--cond)" }}>{d.teamName}</td>
                           <td style={{ padding: "7px 10px", fontFamily: "var(--cond)", fontSize: 11, fontWeight: 700, color: d.gap === "LEADER" ? "#00C853" : "#CCC" }}>{d.gap}</td>
                           <td style={{ padding: "7px 10px", fontFamily: "var(--cond)", fontSize: 11, color: "#888" }}>{d.interval}</td>
-                          <td style={{ padding: "7px 10px", fontFamily: "var(--cond)", fontSize: 11, fontWeight: 600, color: "#DDD" }}>{d.lastLap}</td>
+                          <td style={{ padding: "7px 10px", fontFamily: "var(--cond)", fontSize: 11, fontWeight: 600, color: "#222" }}>{d.lastLap}</td>
                           <td style={{ padding: "7px 10px" }}><TireChip compound={d.tire} age={d.tireAge} /></td>
-                          <td style={{ padding: "7px 10px", fontFamily: "var(--mono)", fontSize: 14, color: "#666" }}>{d.pits}</td>
+                          <td style={{ padding: "7px 10px", fontFamily: "var(--mono)", fontSize: 14, color: "#888" }}>{d.pits}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
-              ) : <div style={{ padding: 30, textAlign: "center", color: "#555", fontSize: 12, fontFamily: "var(--cond)" }}>
+              ) : <div style={{ padding: 30, textAlign: "center", color: "#999", fontSize: 12, fontFamily: "var(--cond)" }}>
                   No live position data available. Positions appear during active sessions.
-                  <br /><span style={{ fontSize: 10, color: "#444" }}>Source: api.openf1.org/v1/position</span>
+                  <br /><span style={{ fontSize: 10, color: "#999" }}>Source: api.openf1.org/v1/position</span>
                 </div>}
             </Card>
 
@@ -655,19 +655,19 @@ export default function TheUndercut() {
                 <CardHead>🔧 PIT STOPS (OPENF1 API)</CardHead>
                 <div style={{ overflowX: "auto" }}>
                   <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
-                    <thead><tr style={{ background: "#ffffff03" }}>
+                    <thead><tr style={{ background: "#00000005" }}>
                       {["", "DRIVER", "LAP", "DURATION", "TIME"].map(h => (
-                        <th key={h} style={{ padding: "8px 10px", textAlign: "left", fontFamily: "var(--cond)", fontWeight: 700, color: "#444", fontSize: 9, letterSpacing: 1.5 }}>{h}</th>
+                        <th key={h} style={{ padding: "8px 10px", textAlign: "left", fontFamily: "var(--cond)", fontWeight: 700, color: "#999", fontSize: 9, letterSpacing: 1.5 }}>{h}</th>
                       ))}
                     </tr></thead>
                     <tbody>
                       {processedPitStops.slice(0, 15).map((p, i) => (
-                        <tr key={`${p.num}-${p.lap}-${i}`} style={{ borderBottom: "1px solid #ffffff03" }}>
+                        <tr key={`${p.num}-${p.lap}-${i}`} style={{ borderBottom: "1px solid #00000005" }}>
                           <td style={{ padding: "6px 10px", fontFamily: "var(--mono)", fontSize: 14, color: i < 3 ? "#00C853" : "#444" }}>{i + 1}</td>
                           <td style={{ padding: "6px 10px" }}><span style={{ fontFamily: "var(--cond)", fontWeight: 800, color: p.teamColor }}>{p.code}</span></td>
                           <td style={{ padding: "6px 10px", fontFamily: "var(--cond)", fontSize: 11, color: "#888" }}>Lap {p.lap}</td>
                           <td style={{ padding: "6px 10px", fontFamily: "var(--mono)", fontSize: 16, letterSpacing: 1, color: Number(p.duration) < 3 ? "#00C853" : Number(p.duration) < 4 ? T.primary : "#FF9800" }}>{p.duration}s</td>
-                          <td style={{ padding: "6px 10px", fontSize: 10, color: "#555" }}>{p.time}</td>
+                          <td style={{ padding: "6px 10px", fontSize: 10, color: "#999" }}>{p.time}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -690,10 +690,10 @@ export default function TheUndercut() {
                     <>
                       <ResponsiveContainer width="100%" height={220}>
                         <LineChart data={processedLapTimes.data}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#ffffff06" />
-                          <XAxis dataKey="lap" stroke="#333" tick={{ fontSize: 9, fill: "#555" }} />
-                          <YAxis domain={["dataMin - 1", "dataMax + 1"]} stroke="#333" tick={{ fontSize: 9, fill: "#555" }} />
-                          <Tooltip contentStyle={{ background: T.surface, border: `1px solid ${T.primary}33`, borderRadius: 8, fontSize: 10 }} formatter={(v) => v ? `${Number(v).toFixed(3)}s` : "—"} />
+                          <CartesianGrid strokeDasharray="3 3" stroke="#00000008" />
+                          <XAxis dataKey="lap" stroke="#DDD" tick={{ fontSize: 9, fill: "#999" }} />
+                          <YAxis domain={["dataMin - 1", "dataMax + 1"]} stroke="#DDD" tick={{ fontSize: 9, fill: "#999" }} />
+                          <Tooltip contentStyle={{ background: "#FFFFFF", border: `1px solid ${T.primary}33`, boxShadow: "0 4px 16px #00000012", borderRadius: 8, fontSize: 10 }} formatter={(v) => v ? `${Number(v).toFixed(3)}s` : "—"} />
                           {processedLapTimes.drivers.map((dn, i) => {
                             const d = openf1Drivers?.find(dr => dr.driver_number === Number(dn));
                             const color = d?.team_colour ? `#${d.team_colour}` : ["#3671C6", "#FF8000", "#E8002D", "#27F4D2"][i] || "#888";
@@ -714,7 +714,7 @@ export default function TheUndercut() {
                       </div>
                     </>
                   ) : loading.live ? <Loader label="LOADING LAP DATA" /> : (
-                    <div style={{ padding: 20, textAlign: "center", color: "#555", fontSize: 12 }}>No lap time data available</div>
+                    <div style={{ padding: 20, textAlign: "center", color: "#999", fontSize: 12, color: "#999" }}>No lap time data available</div>
                   )}
                 </div>
               </Card>
@@ -734,15 +734,15 @@ export default function TheUndercut() {
                         { ic: "🌧️", l: "RAINFALL", v: processedWeather.rain ? "YES" : "NO" },
                         { ic: "📊", l: "PRESSURE", v: `${processedWeather.pressure?.toFixed(0)} hPa` },
                       ].filter(w => w.v && !w.v.includes("undefined") && !w.v.includes("null")).map(w => (
-                        <div key={w.l} style={{ background: "#ffffff04", borderRadius: 10, padding: 14, textAlign: "center" }}>
+                        <div key={w.l} style={{ background: "#00000006", borderRadius: 10, padding: 14, textAlign: "center" }}>
                           <div style={{ fontSize: 22, marginBottom: 2 }}>{w.ic}</div>
-                          <div style={{ fontSize: 8, color: "#555", fontFamily: "var(--cond)", fontWeight: 600, letterSpacing: 1 }}>{w.l}</div>
+                          <div style={{ fontSize: 8, color: "#999", fontFamily: "var(--cond)", fontWeight: 600, letterSpacing: 1 }}>{w.l}</div>
                           <div style={{ fontSize: 18, fontFamily: "var(--mono)", color: T.primary, marginTop: 3, letterSpacing: 1 }}>{w.v}</div>
                         </div>
                       ))}
                     </div>
                   ) : loading.live ? <Loader label="FETCHING WEATHER" /> : (
-                    <div style={{ padding: 20, textAlign: "center", color: "#555", fontSize: 12 }}>No weather data available<br /><span style={{ fontSize: 10, color: "#444" }}>Source: api.openf1.org/v1/weather</span></div>
+                    <div style={{ padding: 20, textAlign: "center", color: "#999", fontSize: 12, color: "#999" }}>No weather data available<br /><span style={{ fontSize: 10, color: "#999" }}>Source: api.openf1.org/v1/weather</span></div>
                   )}
                 </div>
               </Card>
@@ -754,18 +754,18 @@ export default function TheUndercut() {
                 <CardHead>🛞 TIRE STINTS (OPENF1 API)</CardHead>
                 <div style={{ overflowX: "auto" }}>
                   <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
-                    <thead><tr style={{ background: "#ffffff03" }}>
+                    <thead><tr style={{ background: "#00000005" }}>
                       {["DRIVER", "STINT", "COMPOUND", "START LAP", "END LAP", "LAPS", "AGE AT PIT"].map(h => (
-                        <th key={h} style={{ padding: "8px 10px", textAlign: "left", fontFamily: "var(--cond)", fontWeight: 700, color: "#444", fontSize: 9, letterSpacing: 1.5 }}>{h}</th>
+                        <th key={h} style={{ padding: "8px 10px", textAlign: "left", fontFamily: "var(--cond)", fontWeight: 700, color: "#999", fontSize: 9, letterSpacing: 1.5 }}>{h}</th>
                       ))}
                     </tr></thead>
                     <tbody>
                       {stints.slice(-30).reverse().map((s, i) => {
                         const d = openf1Drivers?.find(dr => dr.driver_number === s.driver_number);
                         return (
-                          <tr key={i} style={{ borderBottom: "1px solid #ffffff03" }}>
+                          <tr key={i} style={{ borderBottom: "1px solid #00000005" }}>
                             <td style={{ padding: "6px 10px" }}><span style={{ fontFamily: "var(--cond)", fontWeight: 800, color: d?.team_colour ? `#${d.team_colour}` : "#888" }}>{d?.name_acronym || `#${s.driver_number}`}</span></td>
-                            <td style={{ padding: "6px 10px", fontFamily: "var(--mono)", fontSize: 14, color: "#666" }}>{s.stint_number}</td>
+                            <td style={{ padding: "6px 10px", fontFamily: "var(--mono)", fontSize: 14, color: "#888" }}>{s.stint_number}</td>
                             <td style={{ padding: "6px 10px" }}><TireChip compound={s.compound} /></td>
                             <td style={{ padding: "6px 10px", fontFamily: "var(--cond)", fontSize: 11, color: "#888" }}>{s.lap_start}</td>
                             <td style={{ padding: "6px 10px", fontFamily: "var(--cond)", fontSize: 11, color: "#888" }}>{s.lap_end || "—"}</td>
@@ -785,7 +785,7 @@ export default function TheUndercut() {
         {/* ═══ STANDINGS ═══ */}
         {tab === "standings" && (
           <div style={{ animation: "fadeUp 0.3s ease" }}>
-            <p style={{ fontSize: 10, color: "#444", fontFamily: "var(--cond)", margin: "0 0 12px", letterSpacing: 1 }}>Source: api.jolpi.ca/ergast/f1 (Ergast successor)</p>
+            <p style={{ fontSize: 10, color: "#999", fontFamily: "var(--cond)", margin: "0 0 12px", letterSpacing: 1 }}>Source: api.jolpi.ca/ergast/f1 (Ergast successor)</p>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(440px, 1fr))", gap: 12 }}>
               {/* Drivers */}
               <Card glow>
@@ -793,18 +793,18 @@ export default function TheUndercut() {
                 {loading.standings ? <Loader label="FETCHING STANDINGS" /> : processedDriverStandings ? (
                   <div style={{ overflowX: "auto" }}>
                     <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
-                      <thead><tr style={{ background: "#ffffff03" }}>
+                      <thead><tr style={{ background: "#00000005" }}>
                         {["P", "", "DRIVER", "TEAM", "WINS", "PTS"].map(h => (
-                          <th key={h} style={{ padding: "8px 10px", textAlign: "left", fontFamily: "var(--cond)", fontWeight: 700, color: "#444", fontSize: 9, letterSpacing: 1.5 }}>{h}</th>
+                          <th key={h} style={{ padding: "8px 10px", textAlign: "left", fontFamily: "var(--cond)", fontWeight: 700, color: "#999", fontSize: 9, letterSpacing: 1.5 }}>{h}</th>
                         ))}
                       </tr></thead>
                       <tbody>
                         {processedDriverStandings.map((d, i) => (
-                          <tr key={d.code} style={{ borderBottom: "1px solid #ffffff03", background: d.teamKey === teamKey ? `${T.primary}06` : "transparent" }}>
+                          <tr key={d.code} style={{ borderBottom: "1px solid #00000005", background: d.teamKey === teamKey ? `${T.primary}08` : "transparent" }}>
                             <td style={{ padding: "7px 10px", fontFamily: "var(--mono)", fontSize: 16, color: i < 3 ? T.primary : "#444" }}>{d.pos}</td>
                             <td style={{ padding: "7px 4px" }}><div style={{ width: 3, height: 14, background: TEAMS[d.teamKey]?.primary || "#888", borderRadius: 2 }} /></td>
-                            <td style={{ padding: "7px 10px", fontWeight: 700 }}><span style={{ fontFamily: "var(--cond)", fontWeight: 800, color: TEAMS[d.teamKey]?.primary || "#888", marginRight: 5, fontSize: 11 }}>{d.code}</span>{d.name}</td>
-                            <td style={{ padding: "7px 10px", fontSize: 10, color: "#666", fontFamily: "var(--cond)" }}>{d.teamName}</td>
+                            <td style={{ padding: "7px 10px", fontWeight: 700, color: "#1A1A2E" }}><span style={{ fontFamily: "var(--cond)", fontWeight: 800, color: TEAMS[d.teamKey]?.primary || "#888", marginRight: 5, fontSize: 11 }}>{d.code}</span>{d.name}</td>
+                            <td style={{ padding: "7px 10px", fontSize: 10, color: "#888", fontFamily: "var(--cond)" }}>{d.teamName}</td>
                             <td style={{ padding: "7px 10px", fontFamily: "var(--mono)", fontSize: 14, color: "#888" }}>{d.wins}</td>
                             <td style={{ padding: "7px 10px", fontFamily: "var(--mono)", fontSize: 18, color: T.primary, letterSpacing: 1 }}>{d.pts}</td>
                           </tr>
@@ -812,7 +812,7 @@ export default function TheUndercut() {
                       </tbody>
                     </table>
                   </div>
-                ) : <div style={{ padding: 20, textAlign: "center", color: "#555", fontSize: 12 }}>Driver standings unavailable</div>}
+                ) : <div style={{ padding: 20, textAlign: "center", color: "#999", fontSize: 12 }}>Driver standings unavailable</div>}
               </Card>
 
               {/* Constructors */}
@@ -823,9 +823,9 @@ export default function TheUndercut() {
                     <div style={{ padding: 16 }}>
                       <ResponsiveContainer width="100%" height={250}>
                         <BarChart data={processedConstructorStandings} layout="vertical" margin={{ left: 0 }}>
-                          <XAxis type="number" stroke="#333" tick={{ fontSize: 9, fill: "#555" }} />
-                          <YAxis type="category" dataKey="name" stroke="transparent" tick={{ fontSize: 9, fill: "#777" }} width={80} />
-                          <Tooltip contentStyle={{ background: T.surface, border: `1px solid ${T.primary}33`, borderRadius: 8, fontSize: 10 }} />
+                          <XAxis type="number" stroke="#DDD" tick={{ fontSize: 9, fill: "#999" }} />
+                          <YAxis type="category" dataKey="name" stroke="transparent" tick={{ fontSize: 9, fill: "#999" }} width={80} />
+                          <Tooltip contentStyle={{ background: "#FFFFFF", border: `1px solid ${T.primary}33`, boxShadow: "0 4px 16px #00000012", borderRadius: 8, fontSize: 10 }} />
                           <Bar dataKey="pts" radius={[0, 6, 6, 0]} barSize={14}>
                             {processedConstructorStandings.map(c => <Cell key={c.id} fill={TEAMS[c.teamKey]?.primary || "#888"} />)}
                           </Bar>
@@ -834,7 +834,7 @@ export default function TheUndercut() {
                     </div>
                     <div style={{ padding: "0 16px 12px" }}>
                       {processedConstructorStandings.map((c, i) => (
-                        <div key={c.id} style={{ display: "flex", alignItems: "center", padding: "5px 0", borderBottom: "1px solid #ffffff03" }}>
+                        <div key={c.id} style={{ display: "flex", alignItems: "center", padding: "5px 0", borderBottom: "1px solid #00000005" }}>
                           <span style={{ width: 20, fontFamily: "var(--mono)", fontSize: 16, color: i < 3 ? T.primary : "#444" }}>{c.pos}</span>
                           <div style={{ width: 3, height: 12, background: TEAMS[c.teamKey]?.primary || "#888", borderRadius: 2, margin: "0 8px" }} />
                           <span style={{ flex: 1, fontSize: 12, fontWeight: 600 }}>{c.name}</span>
@@ -843,7 +843,7 @@ export default function TheUndercut() {
                       ))}
                     </div>
                   </div>
-                ) : <div style={{ padding: 20, textAlign: "center", color: "#555", fontSize: 12 }}>Constructor standings unavailable</div>}
+                ) : <div style={{ padding: 20, textAlign: "center", color: "#999", fontSize: 12 }}>Constructor standings unavailable</div>}
               </Card>
             </div>
           </div>
@@ -854,7 +854,7 @@ export default function TheUndercut() {
           <div style={{ animation: "fadeUp 0.3s ease" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
               <h3 style={{ margin: 0, fontSize: 11, fontFamily: "var(--mono)", color: T.primary, letterSpacing: 3 }}>2026 RACE CALENDAR</h3>
-              <span style={{ fontSize: 9, color: "#444", fontFamily: "var(--cond)", letterSpacing: 1 }}>Source: Jolpica-F1 API</span>
+              <span style={{ fontSize: 9, color: "#999", fontFamily: "var(--cond)", letterSpacing: 1 }}>Source: Jolpica-F1 API</span>
             </div>
             {loading.schedule ? <Loader label="FETCHING SCHEDULE" /> : processedSchedule ? (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 8 }}>
@@ -864,19 +864,19 @@ export default function TheUndercut() {
                       {r.status === "next" && <Badge color={T.primary} s>NEXT RACE ▸</Badge>}
                       <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: r.status === "next" ? 6 : 0 }}>
                         <div>
-                          <div style={{ fontSize: 8, color: "#555", fontFamily: "var(--cond)", fontWeight: 600, letterSpacing: 1 }}>ROUND {r.round}{r.sprint ? " · SPRINT" : ""}</div>
-                          <div style={{ fontFamily: "var(--mono)", fontSize: 18, color: r.status === "next" ? T.primary : "#FFF", letterSpacing: 2 }}>{r.name}</div>
+                          <div style={{ fontSize: 8, color: "#999", fontFamily: "var(--cond)", fontWeight: 600, letterSpacing: 1 }}>ROUND {r.round}{r.sprint ? " · SPRINT" : ""}</div>
+                          <div style={{ fontFamily: "var(--mono)", fontSize: 18, color: r.status === "next" ? T.primary : "#1A1A2E", letterSpacing: 2 }}>{r.name}</div>
                         </div>
                       </div>
-                      <div style={{ fontSize: 11, color: "#666", fontFamily: "var(--cond)", marginTop: 2 }}>{r.circuit}</div>
+                      <div style={{ fontSize: 11, color: "#888", fontFamily: "var(--cond)", marginTop: 2 }}>{r.circuit}</div>
                       <div style={{ fontSize: 11, color: "#888", fontFamily: "var(--cond)", fontWeight: 600 }}>{r.loc}, {r.country} · {r.date}</div>
                       {r.sprint && <Badge s color="#FFC107" style={{ marginTop: 4 }}>SPRINT WEEKEND</Badge>}
-                      {r.quali && <div style={{ fontSize: 9, color: "#444", marginTop: 4, fontFamily: "var(--cond)" }}>Quali: {r.quali.date} · {r.quali.time?.replace("Z", " UTC")}</div>}
+                      {r.quali && <div style={{ fontSize: 9, color: "#999", marginTop: 4, fontFamily: "var(--cond)" }}>Quali: {r.quali.date} · {r.quali.time?.replace("Z", " UTC")}</div>}
                     </div>
                   </Card>
                 ))}
               </div>
-            ) : <div style={{ padding: 30, textAlign: "center", color: "#555", fontSize: 12 }}>Schedule unavailable</div>}
+            ) : <div style={{ padding: 30, textAlign: "center", color: "#999", fontSize: 12 }}>Schedule unavailable</div>}
           </div>
         )}
 
@@ -884,25 +884,25 @@ export default function TheUndercut() {
         {tab === "racecontrol" && (
           <div style={{ animation: "fadeUp 0.3s ease" }}>
             <Card glow>
-              <CardHead right={<span style={{ fontSize: 8, color: "#444", fontFamily: "var(--cond)" }}>api.openf1.org/v1/race_control · auto-refresh 30s</span>}>🚦 RACE CONTROL — FULL LOG</CardHead>
+              <CardHead right={<span style={{ fontSize: 8, color: "#999", fontFamily: "var(--cond)" }}>api.openf1.org/v1/race_control · auto-refresh 30s</span>}>🚦 RACE CONTROL — FULL LOG</CardHead>
               {processedRaceControl && processedRaceControl.length ? (
                 <div style={{ maxHeight: "60vh", overflow: "auto" }}>
                   {processedRaceControl.map((m, i) => (
-                    <div key={i} style={{ display: "flex", gap: 10, padding: "8px 16px", borderBottom: "1px solid #ffffff03", fontSize: 12, alignItems: "flex-start" }}>
-                      <span style={{ fontFamily: "var(--cond)", fontSize: 11, color: "#444", minWidth: 62, fontWeight: 600, flexShrink: 0 }}>{m.time}</span>
+                    <div key={i} style={{ display: "flex", gap: 10, padding: "8px 16px", borderBottom: "1px solid #00000005", fontSize: 12, alignItems: "flex-start" }}>
+                      <span style={{ fontFamily: "var(--cond)", fontSize: 11, color: "#999", minWidth: 62, fontWeight: 600, flexShrink: 0 }}>{m.time}</span>
                       <div style={{ flexShrink: 0, marginTop: 3 }}>{m.flag && <FlagDot flag={m.flag} />}</div>
                       <div>
                         <span style={{ fontWeight: 600, color: m.cat === "Flag" ? "#FFD600" : m.cat === "SafetyCar" ? "#FFC107" : m.cat === "Drs" ? "#00E676" : "#CCC" }}>{m.msg}</span>
-                        {m.driver && <span style={{ fontSize: 10, color: "#555", marginLeft: 6 }}>Car #{m.driver}</span>}
-                        <span style={{ fontSize: 9, color: "#333", marginLeft: 6 }}>{m.cat}</span>
+                        {m.driver && <span style={{ fontSize: 10, color: "#999", marginLeft: 6 }}>Car #{m.driver}</span>}
+                        <span style={{ fontSize: 9, color: "#999", marginLeft: 6 }}>{m.cat}</span>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : loading.live ? <Loader label="FETCHING RACE CONTROL" /> : (
-                <div style={{ padding: 30, textAlign: "center", color: "#555", fontSize: 12 }}>
+                <div style={{ padding: 30, textAlign: "center", color: "#999", fontSize: 12 }}>
                   No race control messages available for the latest session.
-                  <br /><span style={{ fontSize: 10, color: "#444" }}>Messages appear during active race weekends.</span>
+                  <br /><span style={{ fontSize: 10, color: "#999" }}>Messages appear during active race weekends.</span>
                 </div>
               )}
             </Card>
@@ -913,11 +913,11 @@ export default function TheUndercut() {
                 <CardHead>📋 2026 MEETINGS (OPENF1 API)</CardHead>
                 <div style={{ padding: "4px 0", maxHeight: 300, overflow: "auto" }}>
                   {meetings.map((m, i) => (
-                    <div key={m.meeting_key || i} style={{ display: "flex", alignItems: "center", padding: "6px 16px", borderBottom: "1px solid #ffffff03", fontSize: 11 }}>
+                    <div key={m.meeting_key || i} style={{ display: "flex", alignItems: "center", padding: "6px 16px", borderBottom: "1px solid #00000005", fontSize: 11 }}>
                       <span style={{ fontFamily: "var(--mono)", fontSize: 14, color: T.primary, width: 24, letterSpacing: 1 }}>{i + 1}</span>
                       <span style={{ flex: 1, fontWeight: 600 }}>{m.meeting_name}</span>
                       <span style={{ fontSize: 10, color: "#888", fontFamily: "var(--cond)" }}>{m.location}, {m.country_name}</span>
-                      <span style={{ fontSize: 9, color: "#555", marginLeft: 10 }}>{m.date_start?.split("T")[0]}</span>
+                      <span style={{ fontSize: 9, color: "#999", marginLeft: 10 }}>{m.date_start?.split("T")[0]}</span>
                     </div>
                   ))}
                 </div>
@@ -927,9 +927,9 @@ export default function TheUndercut() {
         )}
       </main>
 
-      <footer style={{ padding: "20px 16px", textAlign: "center", borderTop: "1px solid #ffffff04", marginTop: 24 }}>
-        <span style={{ fontFamily: "var(--mono)", fontSize: 18, letterSpacing: 3, color: "#FFF" }}>THE <span style={{ color: T.primary }}>UNDERCUT</span></span>
-        <p style={{ color: "#333", fontSize: 10, margin: "4px 0 0", fontFamily: "var(--cond)", letterSpacing: 1 }}>
+      <footer style={{ padding: "20px 16px", textAlign: "center", borderTop: "1px solid #00000006", marginTop: 24 }}>
+        <span style={{ fontFamily: "var(--mono)", fontSize: 18, letterSpacing: 3, color: "#111" }}>THE <span style={{ color: T.primary }}>UNDERCUT</span></span>
+        <p style={{ color: "#999", fontSize: 10, margin: "4px 0 0", fontFamily: "var(--cond)", letterSpacing: 1 }}>
           Real-time data: OpenF1 API · Historical data: Jolpica-F1 (Ergast successor) · Educational use
         </p>
       </footer>
