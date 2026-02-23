@@ -492,42 +492,37 @@ export default function App() {
     return (
       <div style={{minHeight:"100vh",background:"linear-gradient(180deg,#0a0a12 0%,#1a1a24 100%)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24,position:"relative",overflow:"hidden"}}>
         {/* Subtle racing line pattern background */}
-        <div style={{position:"absolute",inset:0,opacity:0.03,background:"repeating-linear-gradient(90deg,#FFF 0px,#FFF 1px,transparent 1px,transparent 60px)"}} />
+        <div style={{position:"absolute",inset:0,opacity:0.03,background:"repeating-linear-gradient(90deg,#FFF 0px,#FFF 1px,transparent 1px,transparent 60px)",pointerEvents:"none"}} />
         
-        {/* Logo video animation or static fallback */}
-        <div style={{position:"relative",width:220,height:260,marginBottom:8}}>
-          <video 
-            autoPlay muted playsInline loop
-            style={{width:"100%",height:"100%",objectFit:"contain",filter:"drop-shadow(0 8px 32px rgba(225,6,0,0.25))"}}
-            onError={e=>{e.target.style.display="none";e.target.nextSibling.style.display="block";}}
-          >
-            <source src="/logo-reveal.mp4" type="video/mp4" />
-          </video>
-          {/* Static fallback */}
+        {/* Ambient red glow behind logo */}
+        <div style={{position:"absolute",width:400,height:400,borderRadius:"50%",background:"radial-gradient(circle,rgba(225,6,0,0.08) 0%,transparent 70%)",top:"15%",pointerEvents:"none"}} />
+        
+        {/* Logo — large, with mix-blend-mode to remove white background */}
+        <div style={{marginBottom:16,position:"relative",zIndex:1}}>
           <img 
-            src="/logo-square.jpeg" 
+            src="/logo-wide.png" 
             alt="The Undercut" 
-            style={{display:"none",width:"100%",height:"100%",objectFit:"contain",filter:"drop-shadow(0 8px 32px rgba(225,6,0,0.25))"}} 
+            style={{width:320,maxWidth:"80vw",height:"auto",objectFit:"contain",mixBlendMode:"lighten",filter:"drop-shadow(0 4px 24px rgba(225,6,0,0.3))"}} 
           />
         </div>
 
-        <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:28}}>
+        <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:28,position:"relative",zIndex:1}}>
           <Dot color="#E10600" /><span style={{fontSize:11,color:"#E10600",letterSpacing:3,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:600}}>2026 SEASON · LIVE DATA · 11 TEAMS</span>
         </div>
 
         {/* Team selector */}
-        <div style={{fontSize:11,color:"#555",letterSpacing:2,marginBottom:12,fontFamily:"'Barlow Condensed',sans-serif"}}>SELECT YOUR TEAM</div>
-        <div style={{display:"flex",flexWrap:"wrap",justifyContent:"center",gap:8,maxWidth:420,marginBottom:36}}>
+        <div style={{fontSize:11,color:"#555",letterSpacing:2,marginBottom:12,fontFamily:"'Barlow Condensed',sans-serif",position:"relative",zIndex:1}}>SELECT YOUR TEAM</div>
+        <div style={{display:"flex",flexWrap:"wrap",justifyContent:"center",gap:8,maxWidth:420,marginBottom:36,position:"relative",zIndex:1}}>
           {Object.entries(TEAMS).filter(([k])=>k!=="neutral").map(([k,t])=>(
             <button key={k} onClick={()=>setTeamKey(k)} style={{padding:"6px 14px",borderRadius:20,border:teamKey===k?`2px solid ${t.primary}`:"2px solid #333",background:teamKey===k?`${t.primary}22`:"transparent",color:teamKey===k?t.primary:"#888",fontSize:11,fontWeight:700,cursor:"pointer",transition:"all 0.2s",fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:1}}>
               {t.short}
             </button>
           ))}
         </div>
-        <button onClick={()=>setOnboarding(false)} style={{padding:"14px 48px",borderRadius:30,border:"none",background:"linear-gradient(135deg,#E10600,#B80500)",color:"#FFF",fontSize:16,fontWeight:700,cursor:"pointer",fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:2,boxShadow:"0 8px 30px rgba(225,6,0,0.35)",transition:"transform 0.2s"}} onMouseOver={e=>e.target.style.transform="scale(1.05)"} onMouseOut={e=>e.target.style.transform="scale(1)"}>
+        <button onClick={()=>setOnboarding(false)} style={{padding:"14px 48px",borderRadius:30,border:"none",background:"linear-gradient(135deg,#E10600,#B80500)",color:"#FFF",fontSize:16,fontWeight:700,cursor:"pointer",fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:2,boxShadow:"0 8px 30px rgba(225,6,0,0.35)",transition:"transform 0.2s",position:"relative",zIndex:1}} onMouseOver={e=>e.target.style.transform="scale(1.05)"} onMouseOut={e=>e.target.style.transform="scale(1)"}>
           ENTER THE PIT WALL
         </button>
-        <div style={{position:"absolute",bottom:20,fontSize:9,color:"#444",letterSpacing:2,fontFamily:"'Barlow Condensed',sans-serif"}}>POWERED BY OPENF1 + JOLPICA-F1 APIs</div>
+        <div style={{position:"absolute",bottom:20,fontSize:9,color:"#444",letterSpacing:2,fontFamily:"'Barlow Condensed',sans-serif",pointerEvents:"none"}}>POWERED BY OPENF1 + JOLPICA-F1 APIs</div>
       </div>
     );
   }
