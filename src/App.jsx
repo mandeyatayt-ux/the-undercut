@@ -323,7 +323,7 @@ const DriverProfileModal = ({driver, onClose}) => {
         {/* Hero Banner */}
         <div style={{background:`linear-gradient(135deg, ${t.primary}, ${t.primary}CC)`,padding:"28px 24px 20px",borderRadius:"16px 16px 0 0",display:"flex",alignItems:"center",gap:16,position:"relative",overflow:"hidden"}}>
           <div style={{position:"absolute",right:-20,top:-20,fontSize:160,fontWeight:900,color:"#FFFFFF10",fontFamily:"'Barlow Condensed',sans-serif",lineHeight:1}}>{d.num}</div>
-          <div style={{position:"absolute",left:12,bottom:8,width:40,height:40,opacity:0.08}}><img src="/logo-icon.png" alt="" style={{width:"100%",height:"100%",objectFit:"contain",filter:"brightness(10)"}} /></div>
+          <div style={{position:"absolute",left:12,bottom:8,width:40,height:40,opacity:0.12,pointerEvents:"none"}}><img src="/logo-square-t.png" alt="" style={{width:"100%",height:"100%",objectFit:"contain",filter:"brightness(0) invert(1)"}} /></div>
           <DriverAvatar num={driver} code={d.code} team={d.team} size={80} />
           <div style={{position:"relative",zIndex:1}}>
             <div style={{fontSize:13,color:"#FFFFFF99",fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:2,textTransform:"uppercase"}}>{t.name}</div>
@@ -548,12 +548,12 @@ export default function App() {
         {/* Ambient red glow behind logo */}
         <div style={{position:"absolute",width:400,height:400,borderRadius:"50%",background:"radial-gradient(circle,rgba(225,6,0,0.08) 0%,transparent 70%)",top:"15%",pointerEvents:"none"}} />
         
-        {/* Logo — large, with mix-blend-mode to remove white background */}
+        {/* Logo — transparent PNG, no background */}
         <div style={{marginBottom:16,position:"relative",zIndex:1}}>
           <img 
-            src="/logo-wide.png" 
+            src="/logo-square-t.png" 
             alt="The Undercut" 
-            style={{width:320,maxWidth:"80vw",height:"auto",objectFit:"contain",mixBlendMode:"lighten",filter:"drop-shadow(0 4px 24px rgba(225,6,0,0.3))"}} 
+            style={{width:340,maxWidth:"85vw",height:"auto",objectFit:"contain",filter:"drop-shadow(0 4px 30px rgba(225,6,0,0.35)) drop-shadow(0 0 60px rgba(225,6,0,0.1))"}} 
           />
         </div>
 
@@ -861,7 +861,7 @@ export default function App() {
       {/* Loading shimmer */}
       {isLoading && (
         <div style={{position:"fixed",inset:0,zIndex:300,background:"rgba(255,255,255,0.92)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:16}}>
-          <img src="/logo-icon.png" alt="" style={{width:56,height:56,objectFit:"contain",animation:"pulse 1.5s infinite"}} />
+          <img src="/logo-square-t.png" alt="" style={{width:56,height:56,objectFit:"contain",animation:"pulse 1.5s infinite"}} />
           <div style={{fontSize:12,fontWeight:700,color:"#999",letterSpacing:3,fontFamily:"'Barlow Condensed',sans-serif"}}>LOADING DATA...</div>
           <div style={{width:200,height:3,background:"#f0f0f0",borderRadius:3,overflow:"hidden"}}>
             <div style={{height:"100%",background:`linear-gradient(90deg,transparent,#E10600,transparent)`,backgroundSize:"200% 100%",animation:"shimmer 1.5s linear infinite"}} />
@@ -874,7 +874,7 @@ export default function App() {
         <div style={{maxWidth:1200,margin:"0 auto",display:"flex",alignItems:"center",height:52,gap:12}}>
           {/* Logo */}
           <div style={{display:"flex",alignItems:"center",gap:8,cursor:"pointer"}} onClick={()=>setPage("command")}>
-            <img src="/logo-icon.png" alt="The Undercut" style={{width:34,height:34,objectFit:"contain",filter:`drop-shadow(0 1px 2px ${T.primary}30)`}} />
+            <img src="/logo-mark-t.png" alt="The Undercut" style={{width:34,height:34,objectFit:"contain",filter:`drop-shadow(0 1px 2px ${T.primary}30)`}} />
             <div>
               <div style={{fontSize:14,fontWeight:800,color:"#1a1a22",letterSpacing:2,fontStyle:"italic",lineHeight:1,fontFamily:"'Barlow Condensed',sans-serif"}}>THE UNDERCUT</div>
               <div style={{fontSize:8,color:"#999",letterSpacing:3,lineHeight:1.2,fontFamily:"'Barlow Condensed',sans-serif"}}>F1 INTELLIGENCE</div>
@@ -908,7 +908,7 @@ export default function App() {
           <div style={{position:"relative"}}>
             {/* Subtle logo watermark */}
             <div style={{position:"absolute",top:-20,right:-20,width:280,height:280,opacity:0.025,pointerEvents:"none",zIndex:0}}>
-              <img src="/logo-icon.png" alt="" style={{width:"100%",height:"100%",objectFit:"contain"}} />
+              <img src="/logo-square-t.png" alt="" style={{width:"100%",height:"100%",objectFit:"contain"}} />
             </div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,position:"relative",zIndex:1}}>
             {/* Weather */}
@@ -923,7 +923,7 @@ export default function App() {
                   <div><div style={{fontSize:16,fontWeight:700}}>{weather.rainfall||0}mm</div><div style={{fontSize:10,color:"#888"}}>Rain</div></div>
                   <div><div style={{fontSize:16,fontWeight:700}}>{weather.pressure||"--"} mbar</div><div style={{fontSize:10,color:"#888"}}>Pressure</div></div>
                 </div>
-              ) : <div style={{color:"#bbb",fontSize:13,display:"flex",alignItems:"center",gap:8}}><img src="/logo-icon.png" alt="" style={{width:18,height:18,opacity:0.2}} />Waiting for session data...</div>}
+              ) : <div style={{color:"#bbb",fontSize:13,display:"flex",alignItems:"center",gap:8}}><img src="/logo-mark-t.png" alt="" style={{width:20,height:20,opacity:0.3}} />Waiting for session data...</div>}
             </div>
 
             {/* Race Control */}
@@ -1252,7 +1252,7 @@ export default function App() {
               </div>
             ) : (
               <div style={{background:"#FFF",borderRadius:12,padding:60,border:"1px solid #eee",textAlign:"center"}}>
-                <img src="/logo-icon.png" alt="" style={{width:48,height:48,objectFit:"contain",opacity:0.15,marginBottom:12}} />
+                <img src="/logo-square-t.png" alt="" style={{width:48,height:48,objectFit:"contain",opacity:0.15,marginBottom:12}} />
                 <div style={{color:"#bbb",fontSize:13,fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:1}}>Loading telemetry data...</div>
               </div>
             )}
@@ -1266,7 +1266,7 @@ export default function App() {
       {/* ═══ FOOTER ═══ */}
       <footer style={{maxWidth:1200,margin:"40px auto 0",padding:"20px 16px",borderTop:"1px solid #eee",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}>
         <div style={{display:"flex",alignItems:"center",gap:8,opacity:0.5}}>
-          <img src="/logo-icon.png" alt="" style={{width:20,height:20,objectFit:"contain"}} />
+          <img src="/logo-mark-t.png" alt="" style={{width:22,height:22,objectFit:"contain"}} />
           <span style={{fontSize:10,color:"#999",letterSpacing:2,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:600}}>THE UNDERCUT · F1 INTELLIGENCE</span>
         </div>
         <span style={{fontSize:9,color:"#bbb",letterSpacing:1,fontFamily:"'Barlow Condensed',sans-serif"}}>OPENF1 + JOLPICA-F1 APIs · 2026</span>
