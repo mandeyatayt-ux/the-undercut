@@ -19,6 +19,8 @@ const apiO = {
   latestPit: () => fetchJ(`${OPENF1}/pit?session_key=latest`),
   latestDrivers: () => fetchJ(`${OPENF1}/drivers?session_key=latest`),
   latestLaps: () => fetchJ(`${OPENF1}/laps?session_key=latest`),
+  carData: (dn) => fetchJ(`${OPENF1}/car_data?session_key=latest&driver_number=${dn}`),
+  carDataTwo: (dn1,dn2) => Promise.all([fetchJ(`${OPENF1}/car_data?session_key=latest&driver_number=${dn1}`),fetchJ(`${OPENF1}/car_data?session_key=latest&driver_number=${dn2}`)]),
 };
 const apiJ = {
   schedule: (y = 2026) => fetchJ(`${JOLPICA}/${y}.json`),
@@ -192,10 +194,16 @@ export default function TheUndercut(){
   const [rcMsgs,setRcMsgs]=useState(RC_MSGS);
   const [rcFilter,setRcFilter]=useState("all");
   // Telemetry
-  const [telem]=useState(genTelemetry);
+  const [simTelem]=useState(genTelemetry);
   const [tireDeg]=useState(genTireDeg);
   const [longRun]=useState(genLongRun);
   const [compareTeam,setCompareTeam]=useState("ferrari");
+  const [telemDriver1,setTelemDriver1]=useState(1); // NOR
+  const [telemDriver2,setTelemDriver2]=useState(16); // LEC
+  const [liveCarData,setLiveCarData]=useState(null);
+  const [telemLoading,setTelemLoading]=useState(false);
+  const [telemSource,setTelemSource]=useState("sim"); // "live" or "sim"
+  const [apiDriversData,setApiDriversData]=useState(null); // for headshots
   // API
   const [schedule,setSchedule]=useState(null);
   const [driverStandings,setDriverStandings]=useState(null);
@@ -219,7 +227,47 @@ export default function TheUndercut(){
     if(Array.isArray(sess)&&sess.length) setLatestSession(sess[sess.length-1]);
     if(Array.isArray(wthr)&&wthr.length) setWeatherData(wthr[wthr.length-1]);
     if(Array.isArray(rc)) setApiRaceControl(rc);
+    // Fetch driver info (headshots)
+    const drv = await apiO.latestDrivers();
+    if(Array.isArray(drv)) setApiDriversData(drv);
   })();},[onboarding]);
+
+  // Fetch car telemetry when drivers change
+  const processCarData = (raw, driverNum) => {
+    if(!raw || !Array.isArray(raw) || raw.length < 10) return null;
+    // Downsample to ~100 points for chart
+    const step = Math.max(1, Math.floor(raw.length / 100));
+    return raw.filter((_,i) => i % step === 0).slice(0, 100).map((d, i) => ({
+      d: i, speed: d.speed || 0, throttle: d.throttle || 0, brake: d.brake || 0,
+      gear: d.n_gear || 0, drs: d.drs >= 10 ? 1 : 0, rpm: d.rpm || 0,
+      driver: driverNum, time: d.date,
+    }));
+  };
+
+  const fetchTelemetry = async () => {
+    setTelemLoading(true);
+    const [raw1, raw2] = await apiO.carDataTwo(telemDriver1, telemDriver2);
+    const d1 = processCarData(raw1, telemDriver1);
+    const d2 = processCarData(raw2, telemDriver2);
+    if (d1 && d1.length > 5) {
+      // Merge both drivers into single chart data
+      const merged = d1.map((p, i) => ({
+        d: i, speed1: p.speed, throttle1: p.throttle, brake1: p.brake, gear1: p.gear, drs1: p.drs, rpm1: p.rpm,
+        speed2: d2?.[i]?.speed || 0, throttle2: d2?.[i]?.throttle || 0, brake2: d2?.[i]?.brake || 0, gear2: d2?.[i]?.gear || 0, drs2: d2?.[i]?.drs || 0, rpm2: d2?.[i]?.rpm || 0,
+      }));
+      setLiveCarData(merged);
+      setTelemSource("live");
+    } else {
+      setLiveCarData(null);
+      setTelemSource("sim");
+    }
+    setTelemLoading(false);
+  };
+
+  useEffect(() => {
+    if (onboarding || tab !== "telemetry") return;
+    fetchTelemetry();
+  }, [telemDriver1, telemDriver2, tab, onboarding]);
 
   // Auto-refresh
   useEffect(()=>{if(onboarding)return;const iv=setInterval(async()=>{
@@ -238,6 +286,23 @@ export default function TheUndercut(){
   const w = weatherData?{air:weatherData.air_temperature,track:weatherData.track_temperature,hum:weatherData.humidity,wind:weatherData.wind_speed,rain:weatherData.rainfall}:null;
   const nextRace = schedule?.find(r=>new Date(r.date)>new Date());
   const startSim = ()=>{setLive(true);setLap(0);setFlag("GREEN");setPositions(genPos(0));};
+
+  // Driver info helper — merges OpenF1 headshots with local data
+  const getDriverInfo = (num) => {
+    const local = DRIVERS_22.find(d => d.num === num) || {};
+    const api = apiDriversData?.find(d => d.driver_number === num);
+    return {
+      num, code: api?.name_acronym || local.code || "???",
+      name: api?.full_name || local.name || `Driver #${num}`,
+      team: local.team || mapTeamKey(api?.team_name || ""),
+      headshot: api?.headshot_url || null,
+      country: api?.country_code || null,
+      teamColor: api?.team_colour ? `#${api.team_colour}` : TEAMS[local.team]?.primary || "#888",
+    };
+  };
+  const d1Info = getDriverInfo(telemDriver1);
+  const d2Info = getDriverInfo(telemDriver2);
+  const telemData = telemSource === "live" && liveCarData ? liveCarData : simTelem.map((p,i)=>({...p,speed1:p.speed1,speed2:p.speed2,throttle1:p.throttle,brake1:p.brake,gear1:p.gear,drs1:p.drs,throttle2:Math.max(0,Math.min(100,65+Math.sin(i/100*Math.PI*6+0.5)*38)),brake2:Math.max(0,Math.min(100,28-Math.sin(i/100*Math.PI*6+0.5)*28)),gear2:Math.max(1,Math.min(8,Math.round(4+Math.sin(i/100*Math.PI*6+0.5)*3.5))),drs2:Math.sin(i/100*Math.PI*4+0.5)>0.7?1:0,rpm1:7000+Math.sin(i/100*Math.PI*6)*4000,rpm2:7100+Math.sin(i/100*Math.PI*6+0.3)*3900}));
 
   // ═══ ONBOARDING ═══
   if(onboarding) return (
@@ -478,25 +543,80 @@ export default function TheUndercut(){
         {/* ════ TELEMETRY ════ */}
         {tab==="telemetry"&&(
           <div style={{animation:"fadeUp 0.3s ease"}}>
+            {/* Driver Picker Bar */}
+            <Card glow style={{padding:16,marginBottom:14}}>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:12}}>
+                <div style={{display:"flex",alignItems:"center",gap:14,flex:1}}>
+                  {/* Driver 1 */}
+                  <div style={{display:"flex",alignItems:"center",gap:10,flex:1,minWidth:200}}>
+                    {d1Info.headshot&&<img src={d1Info.headshot} alt={d1Info.code} style={{width:40,height:40,borderRadius:"50%",objectFit:"cover",border:`2px solid ${d1Info.teamColor}`,background:"#F5F5F5"}} onError={e=>{e.target.style.display="none"}}/>}
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:8,color:"#999",fontFamily:"var(--cond)",fontWeight:600,letterSpacing:1}}>DRIVER 1</div>
+                      <select value={telemDriver1} onChange={e=>{setTelemDriver1(Number(e.target.value))}} style={{width:"100%",background:"#F5F5F7",border:`2px solid ${d1Info.teamColor}33`,borderRadius:8,padding:"6px 10px",color:"#333",fontSize:12,fontFamily:"var(--cond)",fontWeight:700,cursor:"pointer"}}>
+                        {DRIVERS_22.map(d=><option key={d.num} value={d.num}>#{d.num} {d.code} — {d.name}</option>)}
+                      </select>
+                    </div>
+                    {d1Info.country&&<img src={`https://flagcdn.com/24x18/${d1Info.country.toLowerCase()}.png`} alt="" style={{borderRadius:2}} onError={e=>{e.target.style.display="none"}}/>}
+                  </div>
+                  <div style={{fontSize:14,color:"#DDD",fontFamily:"var(--mono)"}}>VS</div>
+                  {/* Driver 2 */}
+                  <div style={{display:"flex",alignItems:"center",gap:10,flex:1,minWidth:200}}>
+                    {d2Info.headshot&&<img src={d2Info.headshot} alt={d2Info.code} style={{width:40,height:40,borderRadius:"50%",objectFit:"cover",border:`2px solid ${d2Info.teamColor}`,background:"#F5F5F5"}} onError={e=>{e.target.style.display="none"}}/>}
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:8,color:"#999",fontFamily:"var(--cond)",fontWeight:600,letterSpacing:1}}>DRIVER 2</div>
+                      <select value={telemDriver2} onChange={e=>{setTelemDriver2(Number(e.target.value))}} style={{width:"100%",background:"#F5F5F7",border:`2px solid ${d2Info.teamColor}33`,borderRadius:8,padding:"6px 10px",color:"#333",fontSize:12,fontFamily:"var(--cond)",fontWeight:700,cursor:"pointer"}}>
+                        {DRIVERS_22.map(d=><option key={d.num} value={d.num}>#{d.num} {d.code} — {d.name}</option>)}
+                      </select>
+                    </div>
+                    {d2Info.country&&<img src={`https://flagcdn.com/24x18/${d2Info.country.toLowerCase()}.png`} alt="" style={{borderRadius:2}} onError={e=>{e.target.style.display="none"}}/>}
+                  </div>
+                </div>
+                <div style={{display:"flex",alignItems:"center",gap:8}}>
+                  <button onClick={fetchTelemetry} disabled={telemLoading} style={{background:T.primary,border:"none",borderRadius:8,padding:"8px 18px",color:"#FFF",fontFamily:"var(--mono)",fontSize:11,cursor:"pointer",letterSpacing:2,opacity:telemLoading?0.5:1}}>
+                    {telemLoading?"⏳ LOADING...":"🔄 REFRESH"}
+                  </button>
+                  <Badge s color={telemSource==="live"?"#00C853":"#FF9800"}>{telemSource==="live"?"● LIVE DATA":"◐ SIMULATED"}</Badge>
+                </div>
+              </div>
+            </Card>
+
+            {telemLoading ? <Loader label="FETCHING CAR TELEMETRY FROM OPENF1..." /> : <>
+            {/* Charts Legend */}
+            <div style={{display:"flex",gap:12,marginBottom:10,justifyContent:"center"}}>
+              <div style={{display:"flex",alignItems:"center",gap:5}}><div style={{width:16,height:3,background:d1Info.teamColor,borderRadius:2}}/><span style={{fontSize:10,color:"#777",fontFamily:"var(--cond)",fontWeight:600}}>{d1Info.code} ({d1Info.name})</span></div>
+              <div style={{display:"flex",alignItems:"center",gap:5}}><div style={{width:16,height:3,background:d2Info.teamColor,borderRadius:2,opacity:0.7}}/><span style={{fontSize:10,color:"#777",fontFamily:"var(--cond)",fontWeight:600}}>{d2Info.code} ({d2Info.name})</span></div>
+            </div>
+
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(440px,1fr))",gap:12,marginBottom:12}}>
-              <Card><CardH>🏎️ SPEED TRACE (km/h)</CardH><div style={{padding:16}}>
-                <ResponsiveContainer width="100%" height={200}><AreaChart data={telem}><CartesianGrid strokeDasharray="3 3" stroke="#E8E8EC"/><XAxis dataKey="d" stroke="#DDD" tick={{fontSize:8,fill:"#999"}} label={{value:"Distance %",position:"insideBottomRight",offset:-5,fontSize:9,fill:"#BBB"}}/><YAxis stroke="#DDD" tick={{fontSize:8,fill:"#999"}}/><Tooltip contentStyle={TT_S}/>
-                  <Area type="monotone" dataKey="speed1" stroke={T.primary} fill={T.primary} fillOpacity={0.06} strokeWidth={2} name="Your Driver"/>
-                  <Area type="monotone" dataKey="speed2" stroke={TEAMS[compareTeam]?.primary} fill={TEAMS[compareTeam]?.primary} fillOpacity={0.04} strokeWidth={1.5} name="Rival"/>
+              {/* Speed Trace */}
+              <Card><CardH right={<Badge s color={T.primary}>OPENF1 /car_data</Badge>}>🏎️ SPEED TRACE (km/h)</CardH><div style={{padding:16}}>
+                <ResponsiveContainer width="100%" height={200}><AreaChart data={telemData}><CartesianGrid strokeDasharray="3 3" stroke="#E8E8EC"/><XAxis dataKey="d" stroke="#DDD" tick={{fontSize:8,fill:"#999"}} label={{value:"Sample",position:"insideBottomRight",offset:-5,fontSize:9,fill:"#BBB"}}/><YAxis stroke="#DDD" tick={{fontSize:8,fill:"#999"}}/><Tooltip contentStyle={TT_S}/>
+                  <Area type="monotone" dataKey="speed1" stroke={d1Info.teamColor} fill={d1Info.teamColor} fillOpacity={0.06} strokeWidth={2} name={d1Info.code}/>
+                  <Area type="monotone" dataKey="speed2" stroke={d2Info.teamColor} fill={d2Info.teamColor} fillOpacity={0.04} strokeWidth={1.5} name={d2Info.code}/>
                 </AreaChart></ResponsiveContainer>
               </div></Card>
-              <Card><CardH>🦶 THROTTLE & BRAKE (%)</CardH><div style={{padding:16}}>
-                <ResponsiveContainer width="100%" height={200}><AreaChart data={telem}><CartesianGrid strokeDasharray="3 3" stroke="#E8E8EC"/><XAxis dataKey="d" stroke="#DDD" tick={{fontSize:8,fill:"#999"}}/><YAxis stroke="#DDD" tick={{fontSize:8,fill:"#999"}}/><Tooltip contentStyle={TT_S}/>
-                  <Area type="monotone" dataKey="throttle" stroke="#00C853" fill="#00C853" fillOpacity={0.08} strokeWidth={2} name="Throttle"/>
-                  <Area type="monotone" dataKey="brake" stroke="#DC0000" fill="#DC0000" fillOpacity={0.08} strokeWidth={2} name="Brake"/>
+              {/* Throttle & Brake */}
+              <Card><CardH>🦶 THROTTLE & BRAKE — {d1Info.code}</CardH><div style={{padding:16}}>
+                <ResponsiveContainer width="100%" height={200}><AreaChart data={telemData}><CartesianGrid strokeDasharray="3 3" stroke="#E8E8EC"/><XAxis dataKey="d" stroke="#DDD" tick={{fontSize:8,fill:"#999"}}/><YAxis stroke="#DDD" tick={{fontSize:8,fill:"#999"}} domain={[0,100]}/><Tooltip contentStyle={TT_S}/>
+                  <Area type="monotone" dataKey="throttle1" stroke="#00C853" fill="#00C853" fillOpacity={0.08} strokeWidth={2} name={`Throttle (${d1Info.code})`}/>
+                  <Area type="monotone" dataKey="brake1" stroke="#DC0000" fill="#DC0000" fillOpacity={0.08} strokeWidth={2} name={`Brake (${d1Info.code})`}/>
                 </AreaChart></ResponsiveContainer>
               </div></Card>
-              <Card><CardH>⚙️ GEAR & DRS</CardH><div style={{padding:16}}>
-                <ResponsiveContainer width="100%" height={200}><AreaChart data={telem}><CartesianGrid strokeDasharray="3 3" stroke="#E8E8EC"/><XAxis dataKey="d" stroke="#DDD" tick={{fontSize:8,fill:"#999"}}/><YAxis domain={[0,9]} stroke="#DDD" tick={{fontSize:8,fill:"#999"}} ticks={[1,2,3,4,5,6,7,8]}/><Tooltip contentStyle={TT_S}/>
-                  <Area type="stepAfter" dataKey="gear" stroke={T.primary} fill={T.primary} fillOpacity={0.1} strokeWidth={2} name="Gear"/>
-                  <Area type="stepAfter" dataKey="drs" stroke="#00C853" fill="#00C853" fillOpacity={0.15} strokeWidth={1} name="DRS"/>
+              {/* Gear & DRS */}
+              <Card><CardH>⚙️ GEAR & DRS — {d1Info.code} vs {d2Info.code}</CardH><div style={{padding:16}}>
+                <ResponsiveContainer width="100%" height={200}><AreaChart data={telemData}><CartesianGrid strokeDasharray="3 3" stroke="#E8E8EC"/><XAxis dataKey="d" stroke="#DDD" tick={{fontSize:8,fill:"#999"}}/><YAxis domain={[0,9]} stroke="#DDD" tick={{fontSize:8,fill:"#999"}} ticks={[1,2,3,4,5,6,7,8]}/><Tooltip contentStyle={TT_S}/>
+                  <Area type="stepAfter" dataKey="gear1" stroke={d1Info.teamColor} fill={d1Info.teamColor} fillOpacity={0.1} strokeWidth={2} name={`Gear (${d1Info.code})`}/>
+                  <Area type="stepAfter" dataKey="gear2" stroke={d2Info.teamColor} fill={d2Info.teamColor} fillOpacity={0.06} strokeWidth={1.5} name={`Gear (${d2Info.code})`}/>
                 </AreaChart></ResponsiveContainer>
               </div></Card>
+              {/* RPM */}
+              <Card><CardH>🔧 ENGINE RPM — {d1Info.code} vs {d2Info.code}</CardH><div style={{padding:16}}>
+                <ResponsiveContainer width="100%" height={200}><AreaChart data={telemData}><CartesianGrid strokeDasharray="3 3" stroke="#E8E8EC"/><XAxis dataKey="d" stroke="#DDD" tick={{fontSize:8,fill:"#999"}}/><YAxis stroke="#DDD" tick={{fontSize:8,fill:"#999"}}/><Tooltip contentStyle={TT_S}/>
+                  <Area type="monotone" dataKey="rpm1" stroke={d1Info.teamColor} fill={d1Info.teamColor} fillOpacity={0.06} strokeWidth={2} name={`RPM (${d1Info.code})`}/>
+                  <Area type="monotone" dataKey="rpm2" stroke={d2Info.teamColor} fill={d2Info.teamColor} fillOpacity={0.04} strokeWidth={1.5} name={`RPM (${d2Info.code})`}/>
+                </AreaChart></ResponsiveContainer>
+              </div></Card>
+              {/* Tire Deg */}
               <Card><CardH>🛞 TIRE DEGRADATION MODEL</CardH><div style={{padding:16}}>
                 <ResponsiveContainer width="100%" height={200}><LineChart data={tireDeg}><CartesianGrid strokeDasharray="3 3" stroke="#E8E8EC"/><XAxis dataKey="lap" stroke="#DDD" tick={{fontSize:8,fill:"#999"}} label={{value:"Laps",position:"insideBottomRight",offset:-5,fontSize:9,fill:"#BBB"}}/><YAxis domain={[35,100]} stroke="#DDD" tick={{fontSize:8,fill:"#999"}} label={{value:"Grip %",angle:-90,position:"insideLeft",fontSize:9,fill:"#BBB"}}/><Tooltip contentStyle={TT_S}/>
                   <Line type="monotone" dataKey="soft" stroke={TIRE_C.SOFT} strokeWidth={2} dot={false} name="Soft"/>
@@ -504,6 +624,13 @@ export default function TheUndercut(){
                   <Line type="monotone" dataKey="hard" stroke="#999" strokeWidth={2} dot={false} name="Hard"/>
                 </LineChart></ResponsiveContainer>
                 <div style={{display:"flex",justifyContent:"center",gap:12,marginTop:6}}>{[["SOFT",TIRE_C.SOFT,"~18 laps"],["MEDIUM",TIRE_C.MEDIUM,"~30 laps"],["HARD","#999","~45 laps"]].map(([n,c,l])=>(<div key={n} style={{display:"flex",alignItems:"center",gap:4}}><TireChip compound={n}/><span style={{fontSize:9,color:"#999"}}>{l}</span></div>))}</div>
+              </div></Card>
+              {/* Throttle comparison D2 */}
+              <Card><CardH>🦶 THROTTLE & BRAKE — {d2Info.code}</CardH><div style={{padding:16}}>
+                <ResponsiveContainer width="100%" height={200}><AreaChart data={telemData}><CartesianGrid strokeDasharray="3 3" stroke="#E8E8EC"/><XAxis dataKey="d" stroke="#DDD" tick={{fontSize:8,fill:"#999"}}/><YAxis stroke="#DDD" tick={{fontSize:8,fill:"#999"}} domain={[0,100]}/><Tooltip contentStyle={TT_S}/>
+                  <Area type="monotone" dataKey="throttle2" stroke="#00C853" fill="#00C853" fillOpacity={0.08} strokeWidth={2} name={`Throttle (${d2Info.code})`}/>
+                  <Area type="monotone" dataKey="brake2" stroke="#DC0000" fill="#DC0000" fillOpacity={0.08} strokeWidth={2} name={`Brake (${d2Info.code})`}/>
+                </AreaChart></ResponsiveContainer>
               </div></Card>
             </div>
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(340px,1fr))",gap:12}}>
@@ -518,6 +645,7 @@ export default function TheUndercut(){
                 {w?<div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>{[{ic:"🌡️",l:"AIR",v:`${w.air?.toFixed(1)}°C`},{ic:"🛣️",l:"TRACK",v:`${w.track?.toFixed(1)}°C`},{ic:"💧",l:"HUMIDITY",v:`${w.hum}%`},{ic:"💨",l:"WIND",v:`${w.wind?.toFixed(1)} m/s`},{ic:"🌧️",l:"RAIN",v:w.rain?"YES":"NO"}].filter(x=>x.v&&!x.v.includes("undefined")).map(x=>(<div key={x.l} style={{background:"#F8F8FA",borderRadius:8,padding:12,textAlign:"center"}}><div style={{fontSize:20}}>{x.ic}</div><div style={{fontSize:8,color:"#999",fontFamily:"var(--cond)",fontWeight:600,letterSpacing:1,marginTop:2}}>{x.l}</div><div style={{fontSize:16,fontFamily:"var(--mono)",color:T.primary,marginTop:2}}>{x.v}</div></div>))}</div>:<Loader label="FETCHING WEATHER"/>}
               </div></Card>
             </div>
+            </>}
           </div>
         )}
 
