@@ -274,6 +274,7 @@ const DriverProfileModal = ({driver, onClose}) => {
         {/* Hero Banner */}
         <div style={{background:`linear-gradient(135deg, ${t.primary}, ${t.primary}CC)`,padding:"28px 24px 20px",borderRadius:"16px 16px 0 0",display:"flex",alignItems:"center",gap:16,position:"relative",overflow:"hidden"}}>
           <div style={{position:"absolute",right:-20,top:-20,fontSize:160,fontWeight:900,color:"#FFFFFF10",fontFamily:"'Barlow Condensed',sans-serif",lineHeight:1}}>{d.num}</div>
+          <div style={{position:"absolute",left:12,bottom:8,width:40,height:40,opacity:0.08}}><img src="/logo-icon.png" alt="" style={{width:"100%",height:"100%",objectFit:"contain",filter:"brightness(10)"}} /></div>
           <DriverAvatar num={driver} code={d.code} team={d.team} size={80} />
           <div style={{position:"relative",zIndex:1}}>
             <div style={{fontSize:13,color:"#FFFFFF99",fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:2,textTransform:"uppercase"}}>{t.name}</div>
@@ -489,16 +490,34 @@ export default function App() {
   // ═══ ONBOARDING SCREEN ═══
   if (onboarding) {
     return (
-      <div style={{minHeight:"100vh",background:"linear-gradient(180deg,#0a0a12 0%,#1a1a24 100%)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24}}>
-        <div style={{width:80,height:80,borderRadius:20,background:"linear-gradient(135deg,#E10600,#B80500)",display:"flex",alignItems:"center",justifyContent:"center",marginBottom:24,boxShadow:"0 12px 40px rgba(225,6,0,0.4)"}}>
-          <span style={{fontSize:36,fontWeight:900,color:"#FFF",fontFamily:"'Barlow Condensed',sans-serif",fontStyle:"italic"}}>U</span>
+      <div style={{minHeight:"100vh",background:"linear-gradient(180deg,#0a0a12 0%,#1a1a24 100%)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24,position:"relative",overflow:"hidden"}}>
+        {/* Subtle racing line pattern background */}
+        <div style={{position:"absolute",inset:0,opacity:0.03,background:"repeating-linear-gradient(90deg,#FFF 0px,#FFF 1px,transparent 1px,transparent 60px)"}} />
+        
+        {/* Logo video animation or static fallback */}
+        <div style={{position:"relative",width:220,height:260,marginBottom:8}}>
+          <video 
+            autoPlay muted playsInline loop
+            style={{width:"100%",height:"100%",objectFit:"contain",filter:"drop-shadow(0 8px 32px rgba(225,6,0,0.25))"}}
+            onError={e=>{e.target.style.display="none";e.target.nextSibling.style.display="block";}}
+          >
+            <source src="/logo-reveal.mp4" type="video/mp4" />
+          </video>
+          {/* Static fallback */}
+          <img 
+            src="/logo-square.jpeg" 
+            alt="The Undercut" 
+            style={{display:"none",width:"100%",height:"100%",objectFit:"contain",filter:"drop-shadow(0 8px 32px rgba(225,6,0,0.25))"}} 
+          />
         </div>
-        <h1 style={{fontSize:32,fontWeight:800,color:"#FFF",fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:3,margin:0}}>THE UNDERCUT</h1>
-        <p style={{color:"#888",fontSize:13,letterSpacing:4,margin:"8px 0 40px",fontFamily:"'Barlow Condensed',sans-serif"}}>F1 INTELLIGENCE</p>
-        <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:24}}>
+
+        <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:28}}>
           <Dot color="#E10600" /><span style={{fontSize:11,color:"#E10600",letterSpacing:3,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:600}}>2026 SEASON · LIVE DATA · 11 TEAMS</span>
         </div>
-        <div style={{display:"flex",flexWrap:"wrap",justifyContent:"center",gap:8,maxWidth:400,marginBottom:32}}>
+
+        {/* Team selector */}
+        <div style={{fontSize:11,color:"#555",letterSpacing:2,marginBottom:12,fontFamily:"'Barlow Condensed',sans-serif"}}>SELECT YOUR TEAM</div>
+        <div style={{display:"flex",flexWrap:"wrap",justifyContent:"center",gap:8,maxWidth:420,marginBottom:36}}>
           {Object.entries(TEAMS).filter(([k])=>k!=="neutral").map(([k,t])=>(
             <button key={k} onClick={()=>setTeamKey(k)} style={{padding:"6px 14px",borderRadius:20,border:teamKey===k?`2px solid ${t.primary}`:"2px solid #333",background:teamKey===k?`${t.primary}22`:"transparent",color:teamKey===k?t.primary:"#888",fontSize:11,fontWeight:700,cursor:"pointer",transition:"all 0.2s",fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:1}}>
               {t.short}
@@ -508,6 +527,7 @@ export default function App() {
         <button onClick={()=>setOnboarding(false)} style={{padding:"14px 48px",borderRadius:30,border:"none",background:"linear-gradient(135deg,#E10600,#B80500)",color:"#FFF",fontSize:16,fontWeight:700,cursor:"pointer",fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:2,boxShadow:"0 8px 30px rgba(225,6,0,0.35)",transition:"transform 0.2s"}} onMouseOver={e=>e.target.style.transform="scale(1.05)"} onMouseOut={e=>e.target.style.transform="scale(1)"}>
           ENTER THE PIT WALL
         </button>
+        <div style={{position:"absolute",bottom:20,fontSize:9,color:"#444",letterSpacing:2,fontFamily:"'Barlow Condensed',sans-serif"}}>POWERED BY OPENF1 + JOLPICA-F1 APIs</div>
       </div>
     );
   }
@@ -793,19 +813,25 @@ export default function App() {
       <style>{appStyle}</style>
 
       {/* Loading shimmer */}
-      {isLoading && <div style={{position:"fixed",top:0,left:0,right:0,zIndex:200,height:3,background:`linear-gradient(90deg,transparent,${T.primary},transparent)`,backgroundSize:"200% 100%",animation:"shimmer 1.5s linear infinite"}} />}
+      {isLoading && (
+        <div style={{position:"fixed",inset:0,zIndex:300,background:"rgba(255,255,255,0.92)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:16}}>
+          <img src="/logo-icon.png" alt="" style={{width:56,height:56,objectFit:"contain",animation:"pulse 1.5s infinite"}} />
+          <div style={{fontSize:12,fontWeight:700,color:"#999",letterSpacing:3,fontFamily:"'Barlow Condensed',sans-serif"}}>LOADING DATA...</div>
+          <div style={{width:200,height:3,background:"#f0f0f0",borderRadius:3,overflow:"hidden"}}>
+            <div style={{height:"100%",background:`linear-gradient(90deg,transparent,#E10600,transparent)`,backgroundSize:"200% 100%",animation:"shimmer 1.5s linear infinite"}} />
+          </div>
+        </div>
+      )}
 
       {/* ═══ HEADER ═══ */}
       <header style={{background:"#FFF",borderBottom:"1px solid #eee",padding:"0 16px",position:"sticky",top:0,zIndex:100,boxShadow:"0 1px 8px rgba(0,0,0,0.04)"}}>
         <div style={{maxWidth:1200,margin:"0 auto",display:"flex",alignItems:"center",height:52,gap:12}}>
           {/* Logo */}
           <div style={{display:"flex",alignItems:"center",gap:8,cursor:"pointer"}} onClick={()=>setPage("command")}>
-            <div style={{width:32,height:32,borderRadius:8,background:`linear-gradient(135deg,${T.primary},${T.secondary||T.primary}CC)`,display:"flex",alignItems:"center",justifyContent:"center"}}>
-              <span style={{fontSize:16,fontWeight:900,color:"#FFF",fontFamily:"'Barlow Condensed',sans-serif",fontStyle:"italic"}}>U</span>
-            </div>
+            <img src="/logo-icon.png" alt="The Undercut" style={{width:34,height:34,objectFit:"contain",filter:`drop-shadow(0 1px 2px ${T.primary}30)`}} />
             <div>
-              <div style={{fontSize:14,fontWeight:800,color:"#1a1a22",letterSpacing:2,fontStyle:"italic",lineHeight:1}}>THE UNDERCUT</div>
-              <div style={{fontSize:8,color:"#999",letterSpacing:3,lineHeight:1.2}}>F1 INTELLIGENCE</div>
+              <div style={{fontSize:14,fontWeight:800,color:"#1a1a22",letterSpacing:2,fontStyle:"italic",lineHeight:1,fontFamily:"'Barlow Condensed',sans-serif"}}>THE UNDERCUT</div>
+              <div style={{fontSize:8,color:"#999",letterSpacing:3,lineHeight:1.2,fontFamily:"'Barlow Condensed',sans-serif"}}>F1 INTELLIGENCE</div>
             </div>
           </div>
 
@@ -833,7 +859,12 @@ export default function App() {
 
         {/* ─── COMMAND CENTER ─── */}
         {page === "command" && (
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
+          <div style={{position:"relative"}}>
+            {/* Subtle logo watermark */}
+            <div style={{position:"absolute",top:-20,right:-20,width:280,height:280,opacity:0.025,pointerEvents:"none",zIndex:0}}>
+              <img src="/logo-icon.png" alt="" style={{width:"100%",height:"100%",objectFit:"contain"}} />
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,position:"relative",zIndex:1}}>
             {/* Weather */}
             <div style={{background:"#FFF",borderRadius:12,padding:16,border:"1px solid #eee"}}>
               <div style={{fontSize:12,fontWeight:700,color:"#999",letterSpacing:2,marginBottom:10}}>WEATHER CONDITIONS</div>
@@ -846,7 +877,7 @@ export default function App() {
                   <div><div style={{fontSize:16,fontWeight:700}}>{weather.rainfall||0}mm</div><div style={{fontSize:10,color:"#888"}}>Rain</div></div>
                   <div><div style={{fontSize:16,fontWeight:700}}>{weather.pressure||"--"} mbar</div><div style={{fontSize:10,color:"#888"}}>Pressure</div></div>
                 </div>
-              ) : <div style={{color:"#bbb",fontSize:13}}>Waiting for session data...</div>}
+              ) : <div style={{color:"#bbb",fontSize:13,display:"flex",alignItems:"center",gap:8}}><img src="/logo-icon.png" alt="" style={{width:18,height:18,opacity:0.2}} />Waiting for session data...</div>}
             </div>
 
             {/* Race Control */}
@@ -928,9 +959,8 @@ export default function App() {
               );
             })()}
           </div>
+          </div>
         )}
-
-        {/* ─── RACE WEEKEND ─── */}
         {page === "weekend" && (
           <div>
             {/* Control bar */}
@@ -1078,8 +1108,9 @@ export default function App() {
                 ))}
               </div>
             ) : (
-              <div style={{background:"#FFF",borderRadius:12,padding:40,border:"1px solid #eee",textAlign:"center",color:"#bbb"}}>
-                Loading telemetry data...
+              <div style={{background:"#FFF",borderRadius:12,padding:60,border:"1px solid #eee",textAlign:"center"}}>
+                <img src="/logo-icon.png" alt="" style={{width:48,height:48,objectFit:"contain",opacity:0.15,marginBottom:12}} />
+                <div style={{color:"#bbb",fontSize:13,fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:1}}>Loading telemetry data...</div>
               </div>
             )}
           </div>
@@ -1088,6 +1119,15 @@ export default function App() {
 
       {/* ═══ DRIVER PROFILE MODAL ═══ */}
       {profileDriver && <DriverProfileModal driver={profileDriver} onClose={()=>setProfileDriver(null)} />}
+
+      {/* ═══ FOOTER ═══ */}
+      <footer style={{maxWidth:1200,margin:"40px auto 0",padding:"20px 16px",borderTop:"1px solid #eee",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}>
+        <div style={{display:"flex",alignItems:"center",gap:8,opacity:0.5}}>
+          <img src="/logo-icon.png" alt="" style={{width:20,height:20,objectFit:"contain"}} />
+          <span style={{fontSize:10,color:"#999",letterSpacing:2,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:600}}>THE UNDERCUT · F1 INTELLIGENCE</span>
+        </div>
+        <span style={{fontSize:9,color:"#bbb",letterSpacing:1,fontFamily:"'Barlow Condensed',sans-serif"}}>OPENF1 + JOLPICA-F1 APIs · 2026</span>
+      </footer>
     </div>
   );
 }
