@@ -99,14 +99,63 @@ const DRIVER_HEADSHOTS = {
 const NAME_TO_NUM = {norris:1,piastri:81,leclerc:16,hamilton:44,verstappen:3,russell:63,alonso:14,stroll:18,gasly:10,doohan:7,sainz:55,albon:23,ocon:31,bearman:87,tsunoda:22,hadjar:6,hulkenberg:27,hülkenberg:27,bottas:77,perez:11,pérez:11,antonelli:12,colapinto:43,bortoleto:5,lindblad:41,lawson:4};
 
 // ═══ GP FLAGS & EMOJIS ═══
-const GP_FLAGS = {australia:"au",china:"cn",japan:"jp",bahrain:"bh",saudi:"sa",usa:"us",miami:"us",canada:"ca",monaco:"mc",spain:"es",barcelona:"es",madrid:"es",austria:"at",uk:"gb",britain:"gb",silverstone:"gb",belgium:"be",hungary:"hu",netherlands:"nl",italy:"it",monza:"it",singapore:"sg",azerbaijan:"az",mexico:"mx",brazil:"br",vegas:"us",qatar:"qa",abu:"ae",uae:"ae",france:"fr",portugal:"pt",germany:"de",malaysia:"my"};
-const GP_EMOJI = {australia:"🦘",china:"🐉",japan:"🗾",bahrain:"🏜️",saudi:"🕌",miami:"🌴",canada:"🍁",monaco:"🎰",spain:"☀️",austria:"⛰️",britain:"🇬🇧",silverstone:"🏎️",belgium:"🧇",hungary:"🌶️",netherlands:"🌷",italy:"🍝",monza:"🏁",singapore:"🌃",azerbaijan:"🔥",mexico:"🌮",brazil:"🎉",vegas:"🎲",qatar:"⭐",abu:"🌅"};
+const GP_FLAGS = {australia:"au",australian:"au",china:"cn",chinese:"cn",japan:"jp",japanese:"jp",bahrain:"bh",saudi:"sa",arabia:"sa",usa:"us",miami:"us",canada:"ca",canadian:"ca",monaco:"mc",spain:"es",spanish:"es",barcelona:"es",madrid:"es",austria:"at",austrian:"at",uk:"gb",britain:"gb",british:"gb",silverstone:"gb",belgium:"be",belgian:"be",hungary:"hu",hungarian:"hu",netherlands:"nl",dutch:"nl",italy:"it",italian:"it",monza:"it",singapore:"sg",azerbaijan:"az",mexico:"mx",mexican:"mx",brazil:"br",brazilian:"br",vegas:"us",qatar:"qa",abu:"ae",uae:"ae",france:"fr",portugal:"pt",portuguese:"pt",germany:"de",malaysia:"my",emilia:"it",imola:"it"};
+const GP_EMOJI = {australia:"🦘",australian:"🦘",china:"🐉",chinese:"🐉",japan:"🗾",japanese:"🗾",bahrain:"🏜️",saudi:"🕌",arabia:"🕌",miami:"🌴",canada:"🍁",canadian:"🍁",monaco:"🎰",spain:"☀️",spanish:"☀️",austria:"⛰️",austrian:"⛰️",britain:"🇬🇧",british:"🇬🇧",silverstone:"🏎️",belgium:"🧇",belgian:"🧇",hungary:"🌶️",hungarian:"🌶️",netherlands:"🌷",dutch:"🌷",italy:"🍝",italian:"🍝",monza:"🏁",singapore:"🌃",azerbaijan:"🔥",mexico:"🌮",mexican:"🌮",brazil:"🎉",brazilian:"🎉",vegas:"🎲",qatar:"⭐",abu:"🌅",emilia:"🏎️",imola:"🏎️"};
 const getGPFlag = (n) => { if(!n)return null;const l=n.toLowerCase();for(const[k,v]of Object.entries(GP_FLAGS))if(l.includes(k))return v;return null; };
 const getGPEmoji = (n) => { if(!n)return"🏁";const l=n.toLowerCase();for(const[k,v]of Object.entries(GP_EMOJI))if(l.includes(k))return v;return"🏁"; };
 
 // ═══ GP HERO IMAGES (unsplash for calendar cards) ═══
-const GP_IMAGES = {australia:"https://images.unsplash.com/photo-1523482580672-f109ba8cb9be?w=600&h=300&fit=crop",china:"https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=600&h=300&fit=crop",japan:"https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=600&h=300&fit=crop",bahrain:"https://images.unsplash.com/photo-1597659840241-37e2b7c2f7b9?w=600&h=300&fit=crop",saudi:"https://images.unsplash.com/photo-1586724237569-9c920b3e9098?w=600&h=300&fit=crop",miami:"https://images.unsplash.com/photo-1535498730771-e735b998cd64?w=600&h=300&fit=crop",monaco:"https://images.unsplash.com/photo-1534258936925-c58bed479fcb?w=600&h=300&fit=crop",canada:"https://images.unsplash.com/photo-1517935706615-2717063c2225?w=600&h=300&fit=crop",spain:"https://images.unsplash.com/photo-1509840841025-9088ba78a826?w=600&h=300&fit=crop",austria:"https://images.unsplash.com/photo-1516550893923-42d28e5677af?w=600&h=300&fit=crop",britain:"https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=600&h=300&fit=crop",belgium:"https://images.unsplash.com/photo-1491557345352-5929e343eb89?w=600&h=300&fit=crop",hungary:"https://images.unsplash.com/photo-1551867633-194f125bddfa?w=600&h=300&fit=crop",netherlands:"https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=600&h=300&fit=crop",italy:"https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=600&h=300&fit=crop",singapore:"https://images.unsplash.com/photo-1525625293386-3f8f99389edd?w=600&h=300&fit=crop",azerbaijan:"https://images.unsplash.com/photo-1604156425963-9be03f86a428?w=600&h=300&fit=crop",mexico:"https://images.unsplash.com/photo-1518105779142-d975f22f1b0a?w=600&h=300&fit=crop",brazil:"https://images.unsplash.com/photo-1483729558449-99ef09a8c325?w=600&h=300&fit=crop",vegas:"https://images.unsplash.com/photo-1605833556294-ea5c7a74f57d?w=600&h=300&fit=crop",qatar:"https://images.unsplash.com/photo-1549221987-25a490f65d34?w=600&h=300&fit=crop",abu:"https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=600&h=300&fit=crop"};
-const getGPImage = (n) => { if(!n)return null;const l=n.toLowerCase();for(const[k,v]of Object.entries(GP_IMAGES))if(l.includes(k))return v;return"https://images.unsplash.com/photo-1504707748692-419802cf939d?w=600&h=300&fit=crop"; };
+const GP_IMAGES = {
+  australia:"https://images.unsplash.com/photo-1523482580672-f109ba8cb9be?w=800&h=400&fit=crop",
+  australian:"https://images.unsplash.com/photo-1523482580672-f109ba8cb9be?w=800&h=400&fit=crop",
+  china:"https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=800&h=400&fit=crop",
+  chinese:"https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=800&h=400&fit=crop",
+  japan:"https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=800&h=400&fit=crop",
+  japanese:"https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=800&h=400&fit=crop",
+  bahrain:"https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&h=400&fit=crop",
+  saudi:"https://images.unsplash.com/photo-1586724237569-9c920b3e9098?w=800&h=400&fit=crop",
+  arabia:"https://images.unsplash.com/photo-1586724237569-9c920b3e9098?w=800&h=400&fit=crop",
+  miami:"https://images.unsplash.com/photo-1535498730771-e735b998cd64?w=800&h=400&fit=crop",
+  monaco:"https://images.unsplash.com/photo-1534258936925-c58bed479fcb?w=800&h=400&fit=crop",
+  canada:"https://images.unsplash.com/photo-1517935706615-2717063c2225?w=800&h=400&fit=crop",
+  canadian:"https://images.unsplash.com/photo-1517935706615-2717063c2225?w=800&h=400&fit=crop",
+  spain:"https://images.unsplash.com/photo-1509840841025-9088ba78a826?w=800&h=400&fit=crop",
+  spanish:"https://images.unsplash.com/photo-1509840841025-9088ba78a826?w=800&h=400&fit=crop",
+  barcelona:"https://images.unsplash.com/photo-1509840841025-9088ba78a826?w=800&h=400&fit=crop",
+  madrid:"https://images.unsplash.com/photo-1539037116277-4db20889f2d4?w=800&h=400&fit=crop",
+  austria:"https://images.unsplash.com/photo-1516550893923-42d28e5677af?w=800&h=400&fit=crop",
+  austrian:"https://images.unsplash.com/photo-1516550893923-42d28e5677af?w=800&h=400&fit=crop",
+  britain:"https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=800&h=400&fit=crop",
+  british:"https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=800&h=400&fit=crop",
+  silverstone:"https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=800&h=400&fit=crop",
+  belgium:"https://images.unsplash.com/photo-1491557345352-5929e343eb89?w=800&h=400&fit=crop",
+  belgian:"https://images.unsplash.com/photo-1491557345352-5929e343eb89?w=800&h=400&fit=crop",
+  hungary:"https://images.unsplash.com/photo-1551867633-194f125bddfa?w=800&h=400&fit=crop",
+  hungarian:"https://images.unsplash.com/photo-1551867633-194f125bddfa?w=800&h=400&fit=crop",
+  netherlands:"https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=800&h=400&fit=crop",
+  dutch:"https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=800&h=400&fit=crop",
+  italy:"https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=800&h=400&fit=crop",
+  italian:"https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=800&h=400&fit=crop",
+  monza:"https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=800&h=400&fit=crop",
+  singapore:"https://images.unsplash.com/photo-1525625293386-3f8f99389edd?w=800&h=400&fit=crop",
+  azerbaijan:"https://images.unsplash.com/photo-1604156425963-9be03f86a428?w=800&h=400&fit=crop",
+  mexico:"https://images.unsplash.com/photo-1518105779142-d975f22f1b0a?w=800&h=400&fit=crop",
+  mexican:"https://images.unsplash.com/photo-1518105779142-d975f22f1b0a?w=800&h=400&fit=crop",
+  brazil:"https://images.unsplash.com/photo-1483729558449-99ef09a8c325?w=800&h=400&fit=crop",
+  brazilian:"https://images.unsplash.com/photo-1483729558449-99ef09a8c325?w=800&h=400&fit=crop",
+  "são paulo":"https://images.unsplash.com/photo-1483729558449-99ef09a8c325?w=800&h=400&fit=crop",
+  "sao paulo":"https://images.unsplash.com/photo-1483729558449-99ef09a8c325?w=800&h=400&fit=crop",
+  vegas:"https://images.unsplash.com/photo-1605833556294-ea5c7a74f57d?w=800&h=400&fit=crop",
+  "las vegas":"https://images.unsplash.com/photo-1605833556294-ea5c7a74f57d?w=800&h=400&fit=crop",
+  qatar:"https://images.unsplash.com/photo-1549221987-25a490f65d34?w=800&h=400&fit=crop",
+  abu:"https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=800&h=400&fit=crop",
+  "abu dhabi":"https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=800&h=400&fit=crop",
+  emilia:"https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=800&h=400&fit=crop",
+  imola:"https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=800&h=400&fit=crop",
+  portugal:"https://images.unsplash.com/photo-1555881400-74d7acaacd8b?w=800&h=400&fit=crop",
+  portuguese:"https://images.unsplash.com/photo-1555881400-74d7acaacd8b?w=800&h=400&fit=crop",
+};
+const getGPImage = (n) => { if(!n)return null;const l=n.toLowerCase();for(const[k,v]of Object.entries(GP_IMAGES))if(l.includes(k))return v;return"https://images.unsplash.com/photo-1504707748692-419802cf939d?w=800&h=400&fit=crop"; };
 
 // ═══ TYRE COMPOUNDS ═══
 const TYRE_COLORS = { S:"#FF3333", M:"#FFD700", H:"#EEEEEE", I:"#44BB44", W:"#2196F3" };
@@ -354,6 +403,8 @@ export default function App() {
 
   // NEW: 4-tab timing system
   const [timingTab, setTimingTab] = useState("laps"); // laps | sectors | segments | tyres
+  const [fpSession, setFpSession] = useState("FP1"); // FP1 | FP2 | FP3
+  const [qSession, setQSession] = useState("Q3"); // Q1 | Q2 | Q3
 
   // API state
   const [schedule, setSchedule] = useState([]);
@@ -1032,10 +1083,10 @@ export default function App() {
                   {/* Q session tabs */}
                   <div style={{display:"flex",gap:4,marginBottom:8}}>
                     {["Q1","Q2","Q3"].map(q=>(
-                      <div key={q} style={{padding:"4px 16px",borderRadius:4,background:q==="Q3"?T.primary:"#f0f0f0",color:q==="Q3"?"#FFF":"#888",fontSize:11,fontWeight:700,letterSpacing:1,fontFamily:"'Barlow Condensed',sans-serif"}}>{q}</div>
+                      <button key={q} onClick={()=>{setQSession(q);setPositions(genPos(0));setSectors(genSectors());}} style={{padding:"4px 16px",borderRadius:4,border:"none",background:qSession===q?T.primary:"#f0f0f0",color:qSession===q?"#FFF":"#888",fontSize:11,fontWeight:700,letterSpacing:1,fontFamily:"'Barlow Condensed',sans-serif",cursor:"pointer",transition:"all 0.2s"}}>{q}</button>
                     ))}
                     <div style={{flex:1}} />
-                    <Badge color="#E10600">KNOCKOUT</Badge>
+                    <Badge color="#E10600">{qSession} · KNOCKOUT</Badge>
                   </div>
                   {renderTimingTable()}
                 </div>
@@ -1058,10 +1109,10 @@ export default function App() {
                 <div>
                   <div style={{display:"flex",gap:4,marginBottom:8}}>
                     {["FP1","FP2","FP3"].map(fp=>(
-                      <div key={fp} style={{padding:"4px 16px",borderRadius:4,background:fp==="FP1"?T.primary:"#f0f0f0",color:fp==="FP1"?"#FFF":"#888",fontSize:11,fontWeight:700,letterSpacing:1,fontFamily:"'Barlow Condensed',sans-serif"}}>{fp}</div>
+                      <button key={fp} onClick={()=>{setFpSession(fp);setPositions(genPos(0));setSectors(genSectors());}} style={{padding:"4px 16px",borderRadius:4,border:"none",background:fpSession===fp?T.primary:"#f0f0f0",color:fpSession===fp?"#FFF":"#888",fontSize:11,fontWeight:700,letterSpacing:1,fontFamily:"'Barlow Condensed',sans-serif",cursor:"pointer",transition:"all 0.2s"}}>{fp}</button>
                     ))}
                     <div style={{flex:1}} />
-                    <Badge color="#888">SESSION</Badge>
+                    <Badge color="#888">{fpSession}</Badge>
                   </div>
                   {renderTimingTable()}
                 </div>
