@@ -63,6 +63,35 @@ const TIRE_C = {SOFT:"#FF3333",MEDIUM:"#FFC300",HARD:"#CCC",INTERMEDIATE:"#39B54
 const TIRE_L = {SOFT:"S",MEDIUM:"M",HARD:"H",INTERMEDIATE:"I",WET:"W",UNKNOWN:"?"};
 const SEC_C = {purple:"#A855F7",green:"#22C55E",yellow:"#EAB308"};
 
+// ═══ DRIVER HEADSHOTS — F1 Cloudinary CDN (more reliable for cross-origin) ═══
+const F1_IMG = "https://media.formula1.com/image/upload/f_auto,c_limit,q_75,w_1024/fom-website/drivers";
+const DRIVER_HEADSHOTS = {
+  1: `${F1_IMG}/L/LANNOR01_Lando_Norris/lannor01`,
+  81: `${F1_IMG}/O/OSCPIA01_Oscar_Piastri/oscpia01`,
+  16: `${F1_IMG}/C/CHALEC01_Charles_Leclerc/chalec01`,
+  44: `${F1_IMG}/L/LEWHAM01_Lewis_Hamilton/lewham01`,
+  3: `${F1_IMG}/M/MAXVER01_Max_Verstappen/maxver01`,
+  63: `${F1_IMG}/G/GEORUS01_George_Russell/georus01`,
+  14: `${F1_IMG}/F/FERALO01_Fernando_Alonso/feralo01`,
+  18: `${F1_IMG}/L/LANSTR01_Lance_Stroll/lanstr01`,
+  10: `${F1_IMG}/P/PIEGAS01_Pierre_Gasly/piegas01`,
+  55: `${F1_IMG}/C/CARSAI01_Carlos_Sainz/carsai01`,
+  23: `${F1_IMG}/A/ALEALB01_Alexander_Albon/alealb01`,
+  31: `${F1_IMG}/E/ESTOCO01_Esteban_Ocon/estoco01`,
+  87: `${F1_IMG}/O/OLIBEA01_Oliver_Bearman/olibea01`,
+  22: `${F1_IMG}/Y/YUKTSU01_Yuki_Tsunoda/yuktsu01`,
+  27: `${F1_IMG}/N/NICHUL01_Nico_Hulkenberg/nichul01`,
+  77: `${F1_IMG}/V/VALBOT01_Valtteri_Bottas/valbot01`,
+  11: `${F1_IMG}/S/SERPER01_Sergio_Perez/serper01`,
+  12: `${F1_IMG}/A/ANDANT01_Andrea_Kimi_Antonelli/andant01`,
+  43: `${F1_IMG}/F/FRACOL01_Franco_Colapinto/fracol01`,
+  6: `${F1_IMG}/I/ISAHAD01_Isack_Hadjar/isahad01`,
+  5: `${F1_IMG}/G/GABBOR01_Gabriel_Bortoleto/gabbor01`,
+  41: `${F1_IMG}/A/ARVLIN01_Arvid_Lindblad/arvlin01`,
+  4: `${F1_IMG}/L/LIALAW01_Liam_Lawson/lialaw01`,
+};
+const NAME_TO_NUM = {norris:1,piastri:81,leclerc:16,hamilton:44,verstappen:3,russell:63,alonso:14,stroll:18,gasly:10,sainz:55,albon:23,ocon:31,bearman:87,tsunoda:22,hulkenberg:27,"hülkenberg":27,bottas:77,perez:11,"pérez":11,antonelli:12,colapinto:43,hadjar:6,bortoleto:5,lindblad:41,lawson:4};
+
 // Country codes for GP locations (flagcdn.com)
 const GP_FLAGS = {
   australia:"au",china:"cn",japan:"jp",bahrain:"bh",saudi:"sa",usa:"us",miami:"us",
@@ -201,6 +230,15 @@ const CardH = ({children,right})=><div style={{padding:"12px 16px",borderBottom:
 const Badge = ({children,color="var(--primary)",s})=><span style={{display:"inline-flex",alignItems:"center",gap:4,padding:s?"2px 8px":"3px 10px",borderRadius:20,background:`${color}10`,border:`1px solid ${color}30`,fontSize:s?8:9,fontWeight:700,fontFamily:"var(--mono)",color,letterSpacing:1,whiteSpace:"nowrap"}}>{children}</span>;
 const Loader = ({label="Loading..."})=><div style={{display:"flex",flexDirection:"column",alignItems:"center",padding:40,gap:10}}><div style={{width:24,height:24,border:"3px solid #E0E0E4",borderTopColor:"var(--primary)",borderRadius:"50%",animation:"spin 0.7s linear infinite"}}/><span style={{fontSize:10,color:"#999",fontFamily:"var(--mono)",letterSpacing:2}}>{label}</span></div>;
 const FlagDot = ({flag})=>{const m={GREEN:"#00C853",YELLOW:"#FFD600",RED:"#FF1744",DOUBLE_YELLOW:"#FF9100",BLUE:"#42A5F5"};return <span style={{display:"inline-block",width:8,height:8,borderRadius:2,background:m[flag?.toUpperCase()]||"#CCC"}}/>;};
+const DriverAvatar = ({num,size=28,border=2}) => {
+  const d = DRIVERS_22.find(x=>x.num===num)||{};
+  const src = DRIVER_HEADSHOTS[num];
+  const tc = TEAMS[d.team]?.primary||"#888";
+  const code = d.code||"";
+  const [failed,setFailed] = useState(false);
+  if(!src||failed) return <div style={{width:size,height:size,borderRadius:"50%",background:`linear-gradient(135deg,${tc},${tc}CC)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:size*0.35,fontFamily:"'Barlow Condensed'",fontWeight:800,color:"#FFF",border:`${border}px solid ${tc}40`,flexShrink:0}}>{code.slice(0,2)}</div>;
+  return <img src={src} alt={code} referrerPolicy="no-referrer" style={{width:size,height:size,borderRadius:"50%",objectFit:"cover",border:`${border}px solid ${tc}`,background:"#F5F5F5",flexShrink:0}} onError={()=>setFailed(true)}/>;
+};
 const TH = ({children})=><th style={{padding:"8px 10px",textAlign:"left",fontFamily:"var(--cond)",fontWeight:700,color:"#AAA",fontSize:9,letterSpacing:1.5}}>{children}</th>;
 const TT_S = {background:"#FFF",border:"1px solid #E4E4E8",borderRadius:8,fontSize:10,boxShadow:"0 4px 16px #00000010"};
 
@@ -318,7 +356,7 @@ export default function TheUndercut(){
   const nextRace = schedule?.find(r=>new Date(r.date)>new Date());
   const startSim = ()=>{setLive(true);setLap(0);setFlag("GREEN");setPositions(genPos(0));};
 
-  // Driver info helper — merges OpenF1 headshots with local data
+  // Driver info helper — uses static CDN headshots (formula1.com blocks hotlinking)
   const getDriverInfo = (num) => {
     const local = DRIVERS_22.find(d => d.num === num) || {};
     const api = apiDriversData?.find(d => d.driver_number === num);
@@ -326,19 +364,21 @@ export default function TheUndercut(){
       num, code: api?.name_acronym || local.code || "???",
       name: api?.full_name || local.name || `Driver #${num}`,
       team: local.team || mapTeamKey(api?.team_name || ""),
-      headshot: api?.headshot_url || null,
+      headshot: DRIVER_HEADSHOTS[num] || api?.headshot_url || null,
       country: api?.country_code || null,
       teamColor: api?.team_colour ? `#${api.team_colour}` : TEAMS[local.team]?.primary || "#888",
     };
   };
   // Headshot by name (for Jolpica standings data)
   const getHeadshotByName = (givenName, familyName) => {
-    if (!apiDriversData) return null;
     const fn = (familyName || "").toLowerCase();
-    const gn = (givenName || "").toLowerCase();
+    const num = NAME_TO_NUM[fn];
+    if (num && DRIVER_HEADSHOTS[num]) return DRIVER_HEADSHOTS[num];
+    // Fallback to API data
+    if (!apiDriversData) return null;
     const match = apiDriversData.find(d => {
       const full = (d.full_name || "").toLowerCase();
-      return full.includes(fn) || (fn.length > 3 && full.includes(fn.slice(0, 4)));
+      return full.includes(fn);
     });
     return match?.headshot_url || null;
   };
@@ -433,7 +473,7 @@ export default function TheUndercut(){
                 {(apiRaceControl||rcMsgs).slice(-15).reverse().map((m,i)=>(<div key={i} style={{display:"flex",gap:8,padding:"6px 16px",borderBottom:"1px solid #F0F0F4",fontSize:11}}><span style={{fontFamily:"var(--cond)",fontSize:10,color:"#999",minWidth:55,fontWeight:600}}>{m.time||(m.date?new Date(m.date).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit",second:"2-digit"}):"—")}</span>{m.flag&&<FlagDot flag={m.flag}/>}<span style={{color:"#444",fontWeight:500,lineHeight:1.3}}>{m.msg||m.message}</span></div>))}
               </div></Card>
               <Card><CardH right={<span style={{fontSize:9,color:"#999",cursor:"pointer"}} onClick={()=>setTab("standings")}>VIEW ALL →</span>}>🏆 STANDINGS</CardH>
-                {driverStandings?<div style={{padding:"2px 0"}}>{driverStandings.slice(0,6).map((ds,i)=>{const hs=getHeadshotByName(ds.Driver?.givenName,ds.Driver?.familyName);return(<div key={i} style={{display:"flex",alignItems:"center",padding:"7px 16px",borderBottom:"1px solid #F0F0F4"}}><span style={{width:20,fontSize:16,fontFamily:"var(--mono)",color:i<3?T.primary:"#CCC"}}>{i+1}</span><div style={{width:3,height:14,background:TEAMS[mapTeamKey(ds.Constructors?.[0]?.constructorId)]?.primary||"#888",borderRadius:2,margin:"0 8px"}}/>{hs&&<img src={hs} alt="" style={{width:28,height:28,borderRadius:"50%",objectFit:"cover",border:`2px solid ${TEAMS[mapTeamKey(ds.Constructors?.[0]?.constructorId)]?.primary||"#DDD"}`,marginRight:8,background:"#F5F5F5"}} onError={e=>{e.target.style.display="none"}}/>}<span style={{flex:1,fontSize:12,fontWeight:600}}>{ds.Driver?.givenName} {ds.Driver?.familyName}</span><span style={{fontSize:16,fontFamily:"var(--mono)",color:T.primary}}>{ds.points}</span></div>)})}</div>:<Loader label="FETCHING"/>}
+                {driverStandings?<div style={{padding:"2px 0"}}>{driverStandings.slice(0,6).map((ds,i)=>{const fn=(ds.Driver?.familyName||"").toLowerCase();const dNum=NAME_TO_NUM[fn];return(<div key={i} style={{display:"flex",alignItems:"center",padding:"7px 16px",borderBottom:"1px solid #F0F0F4"}}><span style={{width:20,fontSize:16,fontFamily:"var(--mono)",color:i<3?T.primary:"#CCC"}}>{i+1}</span><div style={{width:3,height:14,background:TEAMS[mapTeamKey(ds.Constructors?.[0]?.constructorId)]?.primary||"#888",borderRadius:2,margin:"0 8px"}}/>{dNum&&<span style={{marginRight:8}}><DriverAvatar num={dNum} size={30} border={2}/></span>}<span style={{flex:1,fontSize:12,fontWeight:600}}>{ds.Driver?.givenName} {ds.Driver?.familyName}</span><span style={{fontSize:16,fontFamily:"var(--mono)",color:T.primary}}>{ds.points}</span></div>)})}</div>:<Loader label="FETCHING"/>}
               </Card>
             </div>
           </div>
@@ -549,7 +589,7 @@ export default function TheUndercut(){
                     <tr key={d.code} style={{borderBottom:"1px solid #F0F0F4",background:d.team===teamKey?`${T.primary}06`:"transparent"}}>
                       <td style={{padding:"8px 10px",fontFamily:"var(--mono)",fontSize:16,color:i===0?"#A855F7":i<3?T.primary:"#CCC"}}>{i+1}</td>
                       <td><div style={{width:3,height:16,background:TEAMS[d.team]?.primary,borderRadius:2}}/></td>
-                      <td style={{padding:"8px 10px",fontWeight:700,display:"flex",alignItems:"center",gap:6}}>{(()=>{const di=getDriverInfo(d.num);return di.headshot?<img src={di.headshot} alt="" style={{width:24,height:24,borderRadius:"50%",objectFit:"cover",border:`1.5px solid ${TEAMS[d.team]?.primary}`,background:"#F5F5F5"}} onError={e=>{e.target.style.display="none"}}/>:null;})()}<span style={{color:TEAMS[d.team]?.primary,fontFamily:"var(--cond)",fontWeight:800,fontSize:11,marginRight:3}}>{d.code}</span><span style={{color:"#333"}}>{d.name}</span></td>
+                      <td style={{padding:"8px 10px",fontWeight:700,display:"flex",alignItems:"center",gap:6}}><DriverAvatar num={d.num} size={24} border={1.5}/><span style={{color:TEAMS[d.team]?.primary,fontFamily:"var(--cond)",fontWeight:800,fontSize:11,marginRight:3}}>{d.code}</span><span style={{color:"#333"}}>{d.name}</span></td>
                       <td style={{padding:"8px 10px",fontFamily:"var(--cond)",fontSize:11,fontWeight:600,color:SEC_C[d.s1c]}}>{d.s1}</td>
                       <td style={{padding:"8px 10px",fontFamily:"var(--cond)",fontSize:11,fontWeight:600,color:SEC_C[d.s2c]}}>{d.s2}</td>
                       <td style={{padding:"8px 10px",fontFamily:"var(--cond)",fontSize:11,fontWeight:600,color:SEC_C[d.s3c]}}>{d.s3}</td>
@@ -569,14 +609,14 @@ export default function TheUndercut(){
               <div style={{textAlign:"center",padding:"24px 20px"}}>
                 <h2 style={{fontFamily:"var(--mono)",fontSize:"clamp(22px,5vw,36px)",margin:"0 0 24px",background:"linear-gradient(135deg,#FFD700,#FFA500)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>🏆 RACE RESULT</h2>
                 <div style={{display:"flex",justifyContent:"center",alignItems:"flex-end",gap:14,marginBottom:24}}>
-                  {[{p:2,num:1,d:"L. Norris",t:"mclaren",h:100,col:"#C0C0C0"},{p:1,num:3,d:"M. Verstappen",t:"red_bull",h:140,col:"#FFD700"},{p:3,num:16,d:"C. Leclerc",t:"ferrari",h:80,col:"#CD7F32"}].map(p=>{const di=getDriverInfo(p.num);return(
+                  {[{p:2,num:1,d:"L. Norris",t:"mclaren",h:100,col:"#C0C0C0"},{p:1,num:3,d:"M. Verstappen",t:"red_bull",h:140,col:"#FFD700"},{p:3,num:16,d:"C. Leclerc",t:"ferrari",h:80,col:"#CD7F32"}].map(p=>(
                     <div key={p.p}>
                       <div style={{fontSize:p.p===1?36:26,marginBottom:6}}>{p.p===1?"👑":p.p===2?"🥈":"🥉"}</div>
-                      {di.headshot&&<img src={di.headshot} alt={di.code} style={{width:p.p===1?64:50,height:p.p===1?64:50,borderRadius:"50%",objectFit:"cover",border:`3px solid ${p.col}`,background:"#F5F5F5",marginBottom:8,boxShadow:`0 4px 12px ${p.col}44`}} onError={e=>{e.target.style.display="none"}}/>}
+                      <div style={{display:"flex",justifyContent:"center",marginBottom:8}}><DriverAvatar num={p.num} size={p.p===1?64:50} border={3}/></div>
                       <div style={{background:`linear-gradient(180deg,${p.col},${p.col}88)`,width:p.p===1?120:100,height:p.h,borderRadius:"12px 12px 0 0",display:"flex",alignItems:"center",justifyContent:"center"}}><span style={{fontFamily:"var(--mono)",fontSize:p.p===1?36:26,color:"#FFF"}}>{p.p}</span></div>
                       <div style={{background:"#FAFAFA",padding:10,borderRadius:"0 0 12px 12px",border:"1px solid #E4E4E8"}}><div style={{fontWeight:800,fontSize:13}}>{p.d}</div><div style={{fontSize:10,color:TEAMS[p.t].primary,fontWeight:600}}>{TEAMS[p.t].name}</div></div>
                     </div>
-                  );})}
+                  ))}
                 </div>
                 <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(120px,1fr))",gap:8,maxWidth:560,margin:"0 auto"}}>{[{l:"Fastest Lap",v:"1:18.432"},{l:"Overtakes",v:"47"},{l:"Safety Cars",v:"1 SC / 2 VSC"},{l:"DNFs",v:"2"},{l:"Avg Speed",v:"215.3 km/h"},{l:"Duration",v:"1:32:14"}].map(s=>(<div key={s.l} style={{background:"#F8F8FA",borderRadius:10,padding:12,textAlign:"center"}}><div style={{fontSize:8,color:"#999",fontFamily:"var(--cond)",fontWeight:600,letterSpacing:1}}>{s.l}</div><div style={{fontSize:14,fontFamily:"var(--mono)",color:T.primary,marginTop:3}}>{s.v}</div></div>))}</div>
               </div>
@@ -593,7 +633,7 @@ export default function TheUndercut(){
                 <div style={{display:"flex",alignItems:"center",gap:14,flex:1}}>
                   {/* Driver 1 */}
                   <div style={{display:"flex",alignItems:"center",gap:10,flex:1,minWidth:200}}>
-                    {d1Info.headshot&&<img src={d1Info.headshot} alt={d1Info.code} style={{width:40,height:40,borderRadius:"50%",objectFit:"cover",border:`2px solid ${d1Info.teamColor}`,background:"#F5F5F5"}} onError={e=>{e.target.style.display="none"}}/>}
+                    <DriverAvatar num={telemDriver1} size={40} border={2}/>
                     <div style={{flex:1}}>
                       <div style={{fontSize:8,color:"#999",fontFamily:"var(--cond)",fontWeight:600,letterSpacing:1}}>DRIVER 1</div>
                       <select value={telemDriver1} onChange={e=>{setTelemDriver1(Number(e.target.value))}} style={{width:"100%",background:"#F5F5F7",border:`2px solid ${d1Info.teamColor}33`,borderRadius:8,padding:"6px 10px",color:"#333",fontSize:12,fontFamily:"var(--cond)",fontWeight:700,cursor:"pointer"}}>
@@ -605,7 +645,7 @@ export default function TheUndercut(){
                   <div style={{fontSize:14,color:"#DDD",fontFamily:"var(--mono)"}}>VS</div>
                   {/* Driver 2 */}
                   <div style={{display:"flex",alignItems:"center",gap:10,flex:1,minWidth:200}}>
-                    {d2Info.headshot&&<img src={d2Info.headshot} alt={d2Info.code} style={{width:40,height:40,borderRadius:"50%",objectFit:"cover",border:`2px solid ${d2Info.teamColor}`,background:"#F5F5F5"}} onError={e=>{e.target.style.display="none"}}/>}
+                    <DriverAvatar num={telemDriver2} size={40} border={2}/>
                     <div style={{flex:1}}>
                       <div style={{fontSize:8,color:"#999",fontFamily:"var(--cond)",fontWeight:600,letterSpacing:1}}>DRIVER 2</div>
                       <select value={telemDriver2} onChange={e=>{setTelemDriver2(Number(e.target.value))}} style={{width:"100%",background:"#F5F5F7",border:`2px solid ${d2Info.teamColor}33`,borderRadius:8,padding:"6px 10px",color:"#333",fontSize:12,fontFamily:"var(--cond)",fontWeight:700,cursor:"pointer"}}>
@@ -700,11 +740,11 @@ export default function TheUndercut(){
             {standingsTab==="drivers"&&(<Card glow><CardH>🏆 2025 DRIVER CHAMPIONSHIP (JOLPICA)</CardH>
               {driverStandings?<div style={{overflowX:"auto"}}><table style={{width:"100%",borderCollapse:"collapse",fontSize:11}}>
                 <thead><tr style={{background:"#F8F8FA"}}>{["P","","DRIVER","TEAM","WINS","PTS"].map(h=><TH key={h}>{h}</TH>)}</tr></thead>
-                <tbody>{driverStandings.map((ds,i)=>{const tk=mapTeamKey(ds.Constructors?.[0]?.constructorId);const hs=getHeadshotByName(ds.Driver?.givenName,ds.Driver?.familyName);return(
+                <tbody>{driverStandings.map((ds,i)=>{const tk=mapTeamKey(ds.Constructors?.[0]?.constructorId);const dNum=NAME_TO_NUM[(ds.Driver?.familyName||"").toLowerCase()];return(
                   <tr key={i} style={{borderBottom:"1px solid #F0F0F4",background:tk===teamKey?`${T.primary}06`:"transparent"}}>
                     <td style={{padding:"7px 10px",fontFamily:"var(--mono)",fontSize:16,color:i<3?T.primary:"#CCC"}}>{i+1}</td>
                     <td><div style={{width:3,height:14,background:TEAMS[tk]?.primary||"#888",borderRadius:2}}/></td>
-                    <td style={{padding:"7px 10px",fontWeight:700}}><div style={{display:"flex",alignItems:"center",gap:8}}>{hs&&<img src={hs} alt="" style={{width:28,height:28,borderRadius:"50%",objectFit:"cover",border:`2px solid ${TEAMS[tk]?.primary||"#DDD"}`,background:"#F5F5F5"}} onError={e=>{e.target.style.display="none"}}/>}<span>{ds.Driver?.givenName} {ds.Driver?.familyName}</span></div></td>
+                    <td style={{padding:"7px 10px",fontWeight:700}}><div style={{display:"flex",alignItems:"center",gap:8}}>{dNum&&<DriverAvatar num={dNum} size={28} border={2}/>}<span>{ds.Driver?.givenName} {ds.Driver?.familyName}</span></div></td>
                     <td style={{padding:"7px 10px",fontSize:10,color:"#888",fontFamily:"var(--cond)"}}>{ds.Constructors?.[0]?.name}</td>
                     <td style={{padding:"7px 10px",fontFamily:"var(--mono)",fontSize:14,color:"#999"}}>{ds.wins}</td>
                     <td style={{padding:"7px 10px",fontFamily:"var(--mono)",fontSize:18,color:T.primary}}>{ds.points}</td>
@@ -756,16 +796,15 @@ export default function TheUndercut(){
                         <div style={{fontSize:9,fontFamily:"var(--mono)",color:T.primary,letterSpacing:2,marginBottom:6}}>{s.ic} {s.sess} — TOP 3</div>
                         {s.sess==="UPCOMING"?<div style={{fontSize:11,color:"#999",fontFamily:"var(--cond)"}}>Session results will appear after race weekend</div>:(
                           <div style={{display:"flex",gap:8}}>
-                            {mockTop3.map(d=>{const di=getDriverInfo(d.num);return(
+                            {mockTop3.map(d=>(
                               <div key={d.pos} style={{flex:1,background:"#FFF",borderRadius:10,padding:10,border:"1px solid #E8E8EC",textAlign:"center"}}>
                                 <div style={{fontSize:14,fontFamily:"var(--mono)",color:d.pos===1?"#FFD700":d.pos===2?"#C0C0C0":"#CD7F32",marginBottom:4}}>P{d.pos}</div>
-                                {di.headshot&&<img src={di.headshot} alt={di.code} style={{width:36,height:36,borderRadius:"50%",objectFit:"cover",border:`2px solid ${TEAMS[d.t]?.primary}`,background:"#F5F5F5",marginBottom:4}} onError={e=>{e.target.style.display="none"}}/>}
+                                <div style={{display:"flex",justifyContent:"center",marginBottom:4}}><DriverAvatar num={d.num} size={36} border={2}/></div>
                                 <div style={{fontSize:10,fontFamily:"var(--cond)",fontWeight:800,color:TEAMS[d.t]?.primary}}>{d.code}</div>
                                 <div style={{fontSize:9,color:"#999",fontFamily:"var(--cond)"}}>{d.name}</div>
                                 <div style={{fontSize:10,fontFamily:"var(--mono)",color:"#555",marginTop:2}}>{d.time}</div>
                               </div>
-                            );})}
-                          </div>
+                            ))}                          </div>
                         )}
                       </div>
                     ))}
