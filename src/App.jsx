@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { LineChart, Line, AreaChart, Area, BarChart, Bar, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
 // ════════════════════════════════════════════════════════════════════════
@@ -7,26 +7,43 @@ import { LineChart, Line, AreaChart, Area, BarChart, Bar, RadarChart, Radar, Pol
 
 const OPENF1 = "https://api.openf1.org/v1";
 const JOLPICA = "https://api.jolpi.ca/ergast/f1";
-const fetchJ = async (url) => { try { const r = await fetch(url); if (!r.ok) throw new Error(r.status); return await r.json(); } catch (e) { console.warn("API fail:", url, e.message); return null; } };
+
+// ═══ RATE LIMITER — Prevent API hammering ═══
+class RateLimiter {
+  constructor(rps) { this.queue = []; this.last = 0; this.ms = 1000 / rps; }
+  async acquire() {
+    return new Promise(resolve => {
+      const gap = Date.now() - this.last;
+      if (gap >= this.ms && !this.queue.length) { this.last = Date.now(); resolve(); }
+      else { this.queue.push(() => { this.last = Date.now(); resolve(); }); setTimeout(() => this._drain(), Math.max(0, this.ms - gap)); }
+    });
+  }
+  _drain() { if (this.queue.length) { this.queue.shift()?.(); if (this.queue.length) setTimeout(() => this._drain(), this.ms); } }
+}
+const openF1RL = new RateLimiter(3);   // 3 req/s for OpenF1
+const jolpicaRL = new RateLimiter(10); // 10 req/s for Jolpica
+
+const fetchJ = async (url, rl = null) => { try { if (rl) await rl.acquire(); const r = await fetch(url); if (!r.ok) throw new Error(r.status); return await r.json(); } catch (e) { console.warn("API fail:", url, e.message); return null; } };
 
 const apiO = {
-  latestSession: () => fetchJ(`${OPENF1}/sessions?session_key=latest`),
-  latestPositions: () => fetchJ(`${OPENF1}/position?session_key=latest&position<=20`),
-  latestWeather: () => fetchJ(`${OPENF1}/weather?session_key=latest`),
-  latestRaceControl: () => fetchJ(`${OPENF1}/race_control?session_key=latest`),
-  latestIntervals: () => fetchJ(`${OPENF1}/intervals?session_key=latest`),
-  latestStints: () => fetchJ(`${OPENF1}/stints?session_key=latest`),
-  latestPit: () => fetchJ(`${OPENF1}/pit?session_key=latest`),
-  latestDrivers: () => fetchJ(`${OPENF1}/drivers?session_key=latest`),
-  latestLaps: () => fetchJ(`${OPENF1}/laps?session_key=latest`),
-  carData: (dn) => fetchJ(`${OPENF1}/car_data?session_key=latest&driver_number=${dn}`),
-  carDataTwo: (dn1,dn2) => Promise.all([fetchJ(`${OPENF1}/car_data?session_key=latest&driver_number=${dn1}`),fetchJ(`${OPENF1}/car_data?session_key=latest&driver_number=${dn2}`)]),
+  latestSession: () => fetchJ(`${OPENF1}/sessions?session_key=latest`, openF1RL),
+  latestPositions: () => fetchJ(`${OPENF1}/position?session_key=latest&position<=20`, openF1RL),
+  latestWeather: () => fetchJ(`${OPENF1}/weather?session_key=latest`, openF1RL),
+  latestRaceControl: () => fetchJ(`${OPENF1}/race_control?session_key=latest`, openF1RL),
+  latestIntervals: () => fetchJ(`${OPENF1}/intervals?session_key=latest`, openF1RL),
+  latestStints: () => fetchJ(`${OPENF1}/stints?session_key=latest`, openF1RL),
+  latestPit: () => fetchJ(`${OPENF1}/pit?session_key=latest`, openF1RL),
+  latestDrivers: () => fetchJ(`${OPENF1}/drivers?session_key=latest`, openF1RL),
+  latestLaps: () => fetchJ(`${OPENF1}/laps?session_key=latest`, openF1RL),
+  latestTeamRadio: () => fetchJ(`${OPENF1}/team_radio?session_key=latest`, openF1RL),
+  carData: (dn) => fetchJ(`${OPENF1}/car_data?session_key=latest&driver_number=${dn}`, openF1RL),
+  carDataTwo: (dn1,dn2) => Promise.all([fetchJ(`${OPENF1}/car_data?session_key=latest&driver_number=${dn1}`,openF1RL),fetchJ(`${OPENF1}/car_data?session_key=latest&driver_number=${dn2}`,openF1RL)]),
 };
 const apiJ = {
-  schedule: (y = 2026) => fetchJ(`${JOLPICA}/${y}.json`),
-  driverStandings: (y = 2025) => fetchJ(`${JOLPICA}/${y}/driverStandings.json`),
-  constructorStandings: (y = 2025) => fetchJ(`${JOLPICA}/${y}/constructorStandings.json`),
-  lastResult: () => fetchJ(`${JOLPICA}/current/last/results.json`),
+  schedule: (y = 2026) => fetchJ(`${JOLPICA}/${y}.json`, jolpicaRL),
+  driverStandings: (y = 2025) => fetchJ(`${JOLPICA}/${y}/driverStandings.json`, jolpicaRL),
+  constructorStandings: (y = 2025) => fetchJ(`${JOLPICA}/${y}/constructorStandings.json`, jolpicaRL),
+  lastResult: () => fetchJ(`${JOLPICA}/current/last/results.json`, jolpicaRL),
 };
 
 // ═══ TEAMS (2026 GRID — 11 TEAMS) ═══
@@ -135,8 +152,42 @@ const mapTeamKey = (id) => {
   return "neutral";
 };
 
-// ═══ GENERATORS ═══
-const genPos = (lap) => {
+// Map OpenF1 driver number → team key (uses live API data first, static fallback)
+const mapDriverToTeam = (driverNumber, openF1Drivers = []) => {
+  const d = openF1Drivers.find(x => x.driver_number === driverNumber);
+  if (d?.team_name) return mapTeamKey(d.team_name);
+  return DRIVERS_22.find(x => x.num === driverNumber)?.team || "neutral";
+};
+
+// ═══ GENERATORS (API-first, simulated fallback) ═══
+const genPos = (lap, apiPos = [], apiInt = [], apiDrv = []) => {
+  // If real API positions available, use them
+  if (apiPos.length > 0) {
+    // Get latest position per driver (API returns history)
+    const latest = {};
+    apiPos.forEach(p => { if (!latest[p.driver_number] || new Date(p.date) > new Date(latest[p.driver_number].date)) latest[p.driver_number] = p; });
+    const sorted = Object.values(latest).sort((a,b) => a.position - b.position);
+    return sorted.map((pos, i) => {
+      const drv = apiDrv.find(d => d.driver_number === pos.driver_number);
+      const intv = apiInt.find(x => x.driver_number === pos.driver_number);
+      const tk = mapDriverToTeam(pos.driver_number, apiDrv);
+      const staticD = DRIVERS_22.find(d => d.num === pos.driver_number);
+      return {
+        num: pos.driver_number, pos: pos.position,
+        code: drv?.name_acronym || staticD?.code || "???",
+        name: drv?.full_name || staticD?.name || `Driver #${pos.driver_number}`,
+        team: tk,
+        gap: i === 0 ? "LEADER" : `+${intv?.gap_to_leader?.toFixed(3) || (i * 1.2).toFixed(3)}`,
+        interval: i === 0 ? "—" : `+${intv?.interval?.toFixed(3) || (0.5 + Math.random()).toFixed(3)}`,
+        lastLap: `1:${(18 + Math.random() * 3).toFixed(3)}`,
+        bestLap: `1:${(17.8 + Math.random() * 1.5).toFixed(3)}`,
+        tire: ["SOFT","MEDIUM","HARD"][Math.floor(Math.random()*3)],
+        tireAge: Math.floor(Math.random()*22)+1, pits: Math.floor(lap/22),
+        drs: Math.random()>0.65, status: "RUN",
+      };
+    });
+  }
+  // Fallback: simulated
   const a = [...DRIVERS_22];
   if(lap>0) for(let i=a.length-1;i>0;i--) if(Math.random()<0.06){const j=Math.max(0,i-1);[a[i],a[j]]=[a[j],a[i]];}
   return a.map((d,i)=>({...d,pos:i+1,
@@ -149,13 +200,37 @@ const genPos = (lap) => {
   }));
 };
 
-const genSectors = () => DRIVERS_22.map(d=>{
+const genSectors = (apiLaps = [], apiDrv = []) => {
+  if (apiLaps.length > 0) {
+    // Group by driver, get latest lap per driver
+    const byDriver = {};
+    apiLaps.forEach(l => { if (!byDriver[l.driver_number] || l.lap_number > byDriver[l.driver_number].lap_number) byDriver[l.driver_number] = l; });
+    return Object.values(byDriver).map(lap => {
+      const drv = apiDrv.find(d => d.driver_number === lap.driver_number);
+      const tk = mapDriverToTeam(lap.driver_number, apiDrv);
+      const staticD = DRIVERS_22.find(d => d.num === lap.driver_number);
+      const s1 = lap.duration_sector_1 || 24.5 + Math.random()*2.5;
+      const s2 = lap.duration_sector_2 || 31.5 + Math.random()*3;
+      const s3 = lap.duration_sector_3 || 27.5 + Math.random()*2.5;
+      const sc = (segs) => { if (!segs) return ["purple","green","yellow"][Math.floor(Math.random()*3)]; if(segs.includes(2051)) return "purple"; if(segs.includes(2049)) return "green"; return "yellow"; };
+      return {
+        num: lap.driver_number, code: drv?.name_acronym || staticD?.code || "???",
+        name: drv?.full_name || staticD?.name || "Unknown", team: tk,
+        s1:s1.toFixed(3),s2:s2.toFixed(3),s3:s3.toFixed(3),total:(s1+s2+s3).toFixed(3),
+        s1c:sc(lap.segments_sector_1),s2c:sc(lap.segments_sector_2),s3c:sc(lap.segments_sector_3),
+        i1:(285+Math.random()*20).toFixed(1),i2:(310+Math.random()*25).toFixed(1),st:(325+Math.random()*15).toFixed(1),
+      };
+    }).sort((a,b) => parseFloat(a.total) - parseFloat(b.total));
+  }
+  // Fallback: simulated
+  return DRIVERS_22.map(d=>{
   const s1=24.5+Math.random()*2.5,s2=31.5+Math.random()*3,s3=27.5+Math.random()*2.5;
   return {...d,s1:s1.toFixed(3),s2:s2.toFixed(3),s3:s3.toFixed(3),total:(s1+s2+s3).toFixed(3),
     s1c:["purple","green","yellow"][Math.floor(Math.random()*3)],s2c:["purple","green","yellow"][Math.floor(Math.random()*3)],s3c:["purple","green","yellow"][Math.floor(Math.random()*3)],
     i1:(285+Math.random()*20).toFixed(1),i2:(310+Math.random()*25).toFixed(1),st:(325+Math.random()*15).toFixed(1),
   };
 }).sort((a,b)=>a.total-b.total);
+};
 
 const genTelemetry = () => Array.from({length:100},(_,i)=>{const s=i/100;return{d:i,
   speed1:180+Math.sin(s*Math.PI*6)*80+Math.random()*12,speed2:175+Math.sin(s*Math.PI*6+0.3)*82+Math.random()*12,
@@ -184,8 +259,21 @@ const TRACK_PTS = (()=>{const pts=[];const cx=250,cy=200;
     pts.push({x:cx+Math.cos(a)*rx,y:cy+Math.sin(a)*ry});}return pts;})();
 const TRACK_D = "M"+TRACK_PTS.map(p=>`${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" L")+" Z";
 
-const TrackMap = ({positions, teamKey, lap}) => {
-  const cars = (positions||[]).slice(0,22).map((d,i)=>{
+const TrackMap = ({positions, teamKey, lap, apiPos = [], apiDrv = []}) => {
+  // Use API positions if available, otherwise fall back to generated
+  const displayCars = apiPos.length > 0
+    ? (() => {
+        const latest = {};
+        apiPos.forEach(p => { if(!latest[p.driver_number]||new Date(p.date)>new Date(latest[p.driver_number].date)) latest[p.driver_number]=p; });
+        return Object.values(latest).sort((a,b)=>a.position-b.position).map(pos => {
+          const drv = apiDrv.find(d => d.driver_number === pos.driver_number);
+          const tk = mapDriverToTeam(pos.driver_number, apiDrv);
+          return { num: pos.driver_number, code: drv?.name_acronym || DRIVERS_22.find(d=>d.num===pos.driver_number)?.code || "???", team: tk, color: TEAMS[tk]?.primary||"#888" };
+        });
+      })()
+    : (positions||[]).map(d => ({...d, color: TEAMS[d.team]?.primary||"#888"}));
+
+  const cars = displayCars.slice(0,22).map((d,i)=>{
     const progressOffset = (lap||0) * 1.3;
     const idx = Math.floor(((100 - i*4.2 + progressOffset + (d.num||0)*3.7) % 100 + 100) % 100);
     const pt = TRACK_PTS[idx];
@@ -255,7 +343,7 @@ export default function TheUndercut(){
   const totalLaps = mode==="sprint"?24:57;
   const [live,setLive]=useState(false);
   const [positions,setPositions]=useState(()=>genPos(0));
-  const [sectors]=useState(genSectors);
+  const [sectors,setSectors]=useState(()=>genSectors());
   const [flag,setFlag]=useState("GREEN");
   const [qualiSess,setQualiSess]=useState("Q3");
   const [fpSess,setFpSess]=useState("FP1");
@@ -282,24 +370,83 @@ export default function TheUndercut(){
   const [lastResult,setLastResult]=useState(null);
   const [standingsTab,setStandingsTab]=useState("drivers");
   const [selectedRace,setSelectedRace]=useState(null);
+  // Live API data
+  const [apiPositions,setApiPositions]=useState([]);
+  const [apiIntervals,setApiIntervals]=useState([]);
+  const [apiLaps,setApiLaps]=useState([]);
+  const [apiStints,setApiStints]=useState([]);
+  const [apiPitStops,setApiPitStops]=useState([]);
+  const [isLiveSession,setIsLiveSession]=useState(false);
+  const [isLoading,setIsLoading]=useState(false);
+  const rcRef = useRef(null); // race control dedup
 
   const T = TEAMS[teamKey]||TEAMS.neutral;
 
-  // Load APIs
-  useEffect(()=>{if(onboarding)return;(async()=>{
-    const [sch,ds,cs,lr]=await Promise.all([apiJ.schedule(2026),apiJ.driverStandings(2025),apiJ.constructorStandings(2025),apiJ.lastResult()]);
-    if(sch?.MRData?.RaceTable?.Races) setSchedule(sch.MRData.RaceTable.Races);
-    if(ds?.MRData?.StandingsTable?.StandingsLists?.[0]?.DriverStandings) setDriverStandings(ds.MRData.StandingsTable.StandingsLists[0].DriverStandings);
-    if(cs?.MRData?.StandingsTable?.StandingsLists?.[0]?.ConstructorStandings) setConstructorStandings(cs.MRData.StandingsTable.StandingsLists[0].ConstructorStandings);
-    if(lr?.MRData?.RaceTable?.Races?.[0]) setLastResult(lr.MRData.RaceTable.Races[0]);
-    const [sess,wthr,rc]=await Promise.all([apiO.latestSession(),apiO.latestWeather(),apiO.latestRaceControl()]);
-    if(Array.isArray(sess)&&sess.length) setLatestSession(sess[sess.length-1]);
-    if(Array.isArray(wthr)&&wthr.length) setWeatherData(wthr[wthr.length-1]);
-    if(Array.isArray(rc)) setApiRaceControl(rc);
-    // Fetch driver info (headshots)
-    const drv = await apiO.latestDrivers();
-    if(Array.isArray(drv)) setApiDriversData(drv);
+  // ═══ INITIAL DATA LOAD ═══
+  useEffect(()=>{if(onboarding)return;setIsLoading(true);(async()=>{
+    try {
+      // Static data (schedule, standings)
+      const [sch,ds,cs,lr]=await Promise.all([apiJ.schedule(2026),apiJ.driverStandings(2025),apiJ.constructorStandings(2025),apiJ.lastResult()]);
+      if(sch?.MRData?.RaceTable?.Races) setSchedule(sch.MRData.RaceTable.Races);
+      if(ds?.MRData?.StandingsTable?.StandingsLists?.[0]?.DriverStandings) setDriverStandings(ds.MRData.StandingsTable.StandingsLists[0].DriverStandings);
+      if(cs?.MRData?.StandingsTable?.StandingsLists?.[0]?.ConstructorStandings) setConstructorStandings(cs.MRData.StandingsTable.StandingsLists[0].ConstructorStandings);
+      if(lr?.MRData?.RaceTable?.Races?.[0]) setLastResult(lr.MRData.RaceTable.Races[0]);
+      // Live session data (all in parallel)
+      const [sess,wthr,rc,pos,intv,drv,laps,stints,pits]=await Promise.all([
+        apiO.latestSession(),apiO.latestWeather(),apiO.latestRaceControl(),
+        apiO.latestPositions(),apiO.latestIntervals(),apiO.latestDrivers(),
+        apiO.latestLaps(),apiO.latestStints(),apiO.latestPit()
+      ]);
+      if(Array.isArray(sess)&&sess.length) setLatestSession(sess[sess.length-1]);
+      if(Array.isArray(wthr)&&wthr.length) setWeatherData(wthr[wthr.length-1]);
+      if(Array.isArray(rc)) { setApiRaceControl(rc); rcRef.current = rc; }
+      if(Array.isArray(drv)) setApiDriversData(drv);
+      if(Array.isArray(pos)) setApiPositions(pos);
+      if(Array.isArray(intv)) setApiIntervals(intv);
+      if(Array.isArray(laps)) setApiLaps(laps);
+      if(Array.isArray(stints)) setApiStints(stints);
+      if(Array.isArray(pits)) setApiPitStops(pits);
+      // If we got live positions, build real timing + sectors
+      const hasLive = pos && pos.length > 0;
+      setIsLiveSession(hasLive);
+      if(hasLive) {
+        setPositions(genPos(0, pos, intv||[], drv||[]));
+        setSectors(genSectors(laps||[], drv||[]));
+      }
+    } catch(e) { console.error("Init load fail:", e); }
+    finally { setIsLoading(false); }
   })();},[onboarding]);
+
+  // ═══ LIVE POLLING — 3s when app is active ═══
+  useEffect(()=>{if(onboarding)return;const iv=setInterval(async()=>{
+    try {
+      const [wthr,rc,pos,intv,laps]=await Promise.all([
+        apiO.latestWeather(),apiO.latestRaceControl(),
+        apiO.latestPositions(),apiO.latestIntervals(),apiO.latestLaps()
+      ]);
+      if(Array.isArray(wthr)&&wthr.length) setWeatherData(wthr[wthr.length-1]);
+      // Race control dedup — only add genuinely new messages
+      if(Array.isArray(rc)&&rc.length>0) {
+        const prev = rcRef.current || [];
+        const newMsgs = rc.filter(m => !prev.some(p => p.date === m.date && p.message === m.message));
+        if(newMsgs.length > 0) {
+          setRcMsgs(p => [...newMsgs.map(m=>({
+            time: m.date ? new Date(m.date).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit",second:"2-digit"}) : "—",
+            flag: m.flag || "", msg: m.message || "", cat: m.category || "Race"
+          })), ...p].slice(0,30));
+        }
+        setApiRaceControl(rc); rcRef.current = rc;
+      }
+      // Update positions if we got live data
+      if(Array.isArray(pos)&&pos.length>0) {
+        setApiPositions(pos);
+        if(Array.isArray(intv)) setApiIntervals(intv);
+        if(!live) setPositions(genPos(lap, pos, intv||apiIntervals, apiDriversData||[]));
+        setIsLiveSession(true);
+      }
+      if(Array.isArray(laps)&&laps.length>0) setApiLaps(laps);
+    } catch(e) { console.error("Poll fail:", e); }
+  },3000);return()=>clearInterval(iv);},[onboarding,live,lap,apiIntervals,apiDriversData]);
 
   // Fetch car telemetry when drivers change
   const processCarData = (raw, driverNum) => {
@@ -338,23 +485,23 @@ export default function TheUndercut(){
     fetchTelemetry();
   }, [telemDriver1, telemDriver2, tab, onboarding]);
 
-  // Auto-refresh
-  useEffect(()=>{if(onboarding)return;const iv=setInterval(async()=>{
-    const [wthr,rc]=await Promise.all([apiO.latestWeather(),apiO.latestRaceControl()]);
-    if(Array.isArray(wthr)&&wthr.length) setWeatherData(wthr[wthr.length-1]);
-    if(Array.isArray(rc)) setApiRaceControl(rc);
-  },30000);return()=>clearInterval(iv);},[onboarding]);
-
-  // Race sim
+  // ═══ RACE SIMULATION — only generates data when no live API ═══
   useEffect(()=>{if(!live)return;const iv=setInterval(()=>{setLap(p=>{
-    if(p>=totalLaps){setLive(false);return totalLaps;}const n=p+1;setPositions(genPos(n));
-    if(Math.random()>0.9){const nf=["GREEN","YELLOW","YELLOW"][Math.floor(Math.random()*3)];setFlag(nf);setRcMsgs(prev=>[{time:new Date().toLocaleTimeString("en-GB"),flag:nf,msg:nf==="GREEN"?"GREEN FLAG":"YELLOW FLAG SECTOR "+Math.ceil(Math.random()*3),cat:"Flag"},...prev].slice(0,25));}
-    if(Math.random()>0.85){const d=DRIVERS_22[Math.floor(Math.random()*11)];setRcMsgs(prev=>[{time:new Date().toLocaleTimeString("en-GB"),flag:"",msg:`PIT #${d.num} (${d.code}) — ${(2.0+Math.random()*1.2).toFixed(1)}s`,cat:"Pit"},...prev].slice(0,25));}
-    return n;});},2200);return()=>clearInterval(iv);},[live,totalLaps]);
+    if(p>=totalLaps){setLive(false);return totalLaps;}const n=p+1;
+    // Only simulate positions if no live API data
+    if(apiPositions.length === 0) setPositions(genPos(n));
+    else setPositions(genPos(n, apiPositions, apiIntervals, apiDriversData||[]));
+    if(Math.random()>0.9){const nf=["GREEN","YELLOW","YELLOW"][Math.floor(Math.random()*3)];setFlag(nf);setRcMsgs(prev=>[{time:new Date().toLocaleTimeString("en-GB"),flag:nf,msg:nf==="GREEN"?"GREEN FLAG":"YELLOW FLAG SECTOR "+Math.ceil(Math.random()*3),cat:"Flag"},...prev].slice(0,30));}
+    if(Math.random()>0.85){const d=DRIVERS_22[Math.floor(Math.random()*11)];setRcMsgs(prev=>[{time:new Date().toLocaleTimeString("en-GB"),flag:"",msg:`PIT #${d.num} (${d.code}) — ${(2.0+Math.random()*1.2).toFixed(1)}s`,cat:"Pit"},...prev].slice(0,30));}
+    return n;});},2200);return()=>clearInterval(iv);},[live,totalLaps,apiPositions,apiIntervals,apiDriversData]);
 
   const w = weatherData?{air:weatherData.air_temperature,track:weatherData.track_temperature,hum:weatherData.humidity,wind:weatherData.wind_speed,rain:weatherData.rainfall}:null;
   const nextRace = schedule?.find(r=>new Date(r.date)>new Date());
-  const startSim = ()=>{setLive(true);setLap(0);setFlag("GREEN");setPositions(genPos(0));};
+  const startSim = useCallback(()=>{
+    setLive(true);setLap(0);setFlag("GREEN");
+    if(apiPositions.length>0) setPositions(genPos(0,apiPositions,apiIntervals,apiDriversData||[]));
+    else setPositions(genPos(0));
+  },[apiPositions,apiIntervals,apiDriversData]);
 
   // Driver info helper — uses static CDN headshots (formula1.com blocks hotlinking)
   const getDriverInfo = (num) => {
@@ -425,7 +572,7 @@ export default function TheUndercut(){
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;500;600;700;800&family=Barlow:wght@300;400;500;600;700;800;900&display=swap');
         :root{--mono:'Bebas Neue',cursive;--sans:'Barlow',sans-serif;--cond:'Barlow Condensed',sans-serif}
-        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}} @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}} @keyframes spin{to{transform:rotate(360deg)}} @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}} @keyframes glow{0%,100%{box-shadow:0 0 4px var(--primary)33}50%{box-shadow:0 0 14px var(--primary)44}}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}} @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}} @keyframes spin{to{transform:rotate(360deg)}} @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}} @keyframes glow{0%,100%{box-shadow:0 0 4px var(--primary)33}50%{box-shadow:0 0 14px var(--primary)44}} @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
         *{box-sizing:border-box;scrollbar-width:thin;scrollbar-color:${T.primary}22 transparent} *::-webkit-scrollbar{width:4px} *::-webkit-scrollbar-thumb{background:${T.primary}33;border-radius:2px} body{margin:0;background:#FFF}
       `}</style>
 
@@ -437,6 +584,7 @@ export default function TheUndercut(){
               <h1 style={{fontSize:24,fontFamily:"var(--mono)",margin:0,letterSpacing:3,color:"#1A1A2E"}}>THE <span style={{color:T.primary}}>UNDERCUT</span></h1>
               {latestSession&&<Badge color={T.primary} s>{latestSession.session_name} · {latestSession.location||""}</Badge>}
               {live&&<Badge color="#DC0000"><Dot color="#DC0000" size={5}/> LAP {lap}/{totalLaps}</Badge>}
+              {isLiveSession&&!live&&<Badge color="#00C853"><Dot color="#00C853" size={5}/> LIVE DATA</Badge>}
             </div>
             <div onClick={()=>setOnboarding(true)} style={{width:28,height:28,borderRadius:7,background:`linear-gradient(135deg,${T.primary},${T.secondary})`,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontFamily:"var(--mono)",color:"#FFF"}}>{T.short[0]}</div>
           </div>
@@ -453,6 +601,7 @@ export default function TheUndercut(){
         {/* ════ COMMAND CENTER ════ */}
         {tab==="command"&&(
           <div style={{animation:"fadeUp 0.3s ease"}}>
+            {isLoading&&<div style={{position:"fixed",top:0,left:0,right:0,zIndex:200,height:3,background:`linear-gradient(90deg,transparent,${T.primary},transparent)`,backgroundSize:"200% 100%",animation:"shimmer 1.5s linear infinite"}}/>}
             <Card glow style={{padding:24,marginBottom:14,position:"relative",overflow:"hidden"}}>
               <div style={{position:"absolute",inset:0,background:`radial-gradient(ellipse at 85% 40%,${T.primary}08 0%,transparent 55%)`}}/>
               <div style={{position:"relative"}}>
@@ -468,7 +617,7 @@ export default function TheUndercut(){
               </div>
             </Card>
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(340px,1fr))",gap:12}}>
-              <Card glow><CardH>🗺️ TRACK MAP — CAR POSITIONS</CardH><div style={{padding:6}}><TrackMap positions={positions} teamKey={teamKey} lap={lap}/></div></Card>
+              <Card glow><CardH>🗺️ TRACK MAP — CAR POSITIONS</CardH><div style={{padding:6}}><TrackMap positions={positions} teamKey={teamKey} lap={lap} apiPos={apiPositions} apiDrv={apiDriversData||[]}/></div></Card>
               <Card><CardH>🚦 RACE CONTROL</CardH><div style={{maxHeight:280,overflow:"auto",padding:"4px 0"}}>
                 {(apiRaceControl||rcMsgs).slice(-15).reverse().map((m,i)=>(<div key={i} style={{display:"flex",gap:8,padding:"6px 16px",borderBottom:"1px solid #F0F0F4",fontSize:11}}><span style={{fontFamily:"var(--cond)",fontSize:10,color:"#999",minWidth:55,fontWeight:600}}>{m.time||(m.date?new Date(m.date).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit",second:"2-digit"}):"—")}</span>{m.flag&&<FlagDot flag={m.flag}/>}<span style={{color:"#444",fontWeight:500,lineHeight:1.3}}>{m.msg||m.message}</span></div>))}
               </div></Card>
@@ -502,6 +651,7 @@ export default function TheUndercut(){
                     <button onClick={live?()=>setLive(false):startSim} style={{background:live?"#DC0000":T.primary,border:"none",borderRadius:8,padding:"9px 22px",color:"#FFF",fontFamily:"var(--mono)",fontSize:12,cursor:"pointer",letterSpacing:2}}>{live?"⏸ PAUSE":"▶ SIMULATE"}</button>
                     <FlagDot flag={flag}/><span style={{fontSize:10,fontFamily:"var(--mono)",color:flag==="GREEN"?"#00C853":"#FFD600"}}>{flag}</span>
                     <Badge s color={T.primary}>{mode==="sprint"?"SPRINT · 24 LAPS":"GRAND PRIX · 57 LAPS"}</Badge>
+                    {isLiveSession&&<Badge color="#00C853" s>● LIVE API</Badge>}
                   </div>
                   <div style={{display:"flex",alignItems:"center",gap:16}}>
                     <div><div style={{fontSize:9,color:"#999",fontFamily:"var(--cond)",fontWeight:600}}>LAP</div><div style={{fontSize:24,fontFamily:"var(--mono)",color:T.primary}}>{lap}<span style={{fontSize:14,color:"#CCC"}}>/{totalLaps}</span></div></div>
@@ -511,9 +661,9 @@ export default function TheUndercut(){
               </Card>
               {/* Track + Timing */}
               <div style={{display:"grid",gridTemplateColumns:"minmax(260px,340px) 1fr",gap:12,marginBottom:14}}>
-                <Card glow><CardH>🗺️ TRACK MAP</CardH><div style={{padding:4}}><TrackMap positions={positions} teamKey={teamKey} lap={lap}/></div></Card>
+                <Card glow><CardH>🗺️ TRACK MAP</CardH><div style={{padding:4}}><TrackMap positions={positions} teamKey={teamKey} lap={lap} apiPos={apiPositions} apiDrv={apiDriversData||[]}/></div></Card>
                 <Card glow>
-                  <CardH right={live?<Badge color="#DC0000"><Dot color="#DC0000" size={5}/> LIVE</Badge>:null}>📋 LIVE TIMING — {mode==="sprint"?"SPRINT":"GRAND PRIX"}</CardH>
+                  <CardH right={live?<Badge color="#DC0000"><Dot color="#DC0000" size={5}/> LIVE</Badge>:isLiveSession?<Badge color="#00C853">● LIVE DATA</Badge>:null}>📋 LIVE TIMING — {mode==="sprint"?"SPRINT":"GRAND PRIX"}</CardH>
                   <div style={{overflowX:"auto",maxHeight:440,overflow:"auto"}}>
                     <table style={{width:"100%",borderCollapse:"collapse",fontSize:11}}>
                       <thead><tr style={{background:"#F8F8FA"}}>{["P","","DRIVER","GAP","INT","LAST","TIRE","PIT","DRS",""].map(h=><TH key={h}>{h}</TH>)}</tr></thead>
